@@ -1,0 +1,2690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vendor Dashboard - Campus Canteen</title>
+  <link href="https://fonts.googleapis.com/css2?family=Righteous&family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --primary: #e74c3c;
+      --secondary: #c0392b;
+      --accent: #f39c12;
+      --success: #27ae60;
+      --dark: #2c3e50;
+      --light: #ecf0f1;
+      --danger: #e74c3c;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      min-height: 100vh;
+      color: white;
+    }
+
+    /* Auth Screen */
+    .auth-screen {
+      max-width: 450px;
+      margin: 100px auto;
+      background: rgba(44, 62, 80, 0.95);
+      padding: 50px 40px;
+      border-radius: 30px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      border: 3px solid var(--primary);
+    }
+
+    .auth-logo {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .auth-logo-icon {
+      font-size: 80px;
+      margin-bottom: 15px;
+    }
+
+    .auth-logo h1 {
+      font-family: 'Righteous', cursive;
+      color: var(--primary);
+      font-size: 32px;
+      margin-bottom: 5px;
+    }
+
+    .auth-logo p {
+      color: #bdc3c7;
+      font-size: 16px;
+    }
+
+    .form-group {
+      margin-bottom: 25px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: #bdc3c7;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 15px 20px;
+      background: rgba(0,0,0,0.3);
+      border: 2px solid rgba(255,255,255,0.1);
+      border-radius: 15px;
+      color: white;
+      font-size: 16px;
+      font-family: 'Poppins', sans-serif;
+      transition: all 0.3s ease;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(231,76,60,0.2);
+    }
+
+    .auth-btn {
+      width: 100%;
+      padding: 18px;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      border: none;
+      border-radius: 20px;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: 'Righteous', cursive;
+      margin-top: 10px;
+      box-shadow: 0 8px 25px rgba(231,76,60,0.3);
+    }
+
+    .auth-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 35px rgba(231,76,60,0.5);
+    }
+
+    /* Dashboard */
+    .dashboard {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      background: rgba(44, 62, 80, 0.95);
+      padding: 30px;
+      border-right: 3px solid var(--primary);
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+    }
+
+    .logo {
+      text-align: center;
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid rgba(255,255,255,0.1);
+    }
+
+    .logo-icon { font-size: 60px; margin-bottom: 10px; }
+
+    .logo h1 {
+      font-family: 'Righteous', cursive;
+      color: var(--primary);
+      font-size: 24px;
+      margin-bottom: 5px;
+    }
+
+    .logo p { color: #bdc3c7; font-size: 14px; }
+
+    .vendor-profile {
+      background: rgba(0,0,0,0.2);
+      padding: 20px;
+      border-radius: 15px;
+      margin-bottom: 30px;
+      text-align: center;
+    }
+
+    .canteen-code-label { font-size: 14px; color: #bdc3c7; margin-bottom: 10px; }
+
+    #canteenCodeDisplay {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--accent);
+      letter-spacing: 2px;
+      font-family: monospace;
+      margin-bottom: 15px;
+    }
+
+    .copy-code-btn {
+      padding: 10px 20px;
+      background: rgba(255,255,255,0.1);
+      color: white;
+      border: 2px solid rgba(255,255,255,0.2);
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.3s ease;
+    }
+
+    .copy-code-btn:hover { background: var(--primary); border-color: var(--primary); }
+
+    .nav-menu { list-style: none; }
+    .nav-item { margin-bottom: 15px; }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 15px 20px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 15px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: 2px solid transparent;
+    }
+
+    .nav-link:hover {
+      background: rgba(231,76,60,0.2);
+      border-color: var(--primary);
+      transform: translateX(5px);
+    }
+
+    .nav-link.active {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      border-color: var(--primary);
+      box-shadow: 0 5px 20px rgba(231,76,60,0.4);
+    }
+
+    .nav-icon { font-size: 24px; }
+    .nav-text { font-weight: 600; }
+
+    .low-stock-panel {
+      margin-top: 30px;
+      padding: 20px;
+      background: rgba(231,76,60,0.15);
+      border-radius: 15px;
+      border: 2px solid var(--danger);
+    }
+
+    .low-stock-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .low-stock-item {
+      background: rgba(0,0,0,0.3);
+      padding: 12px;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      border-left: 3px solid var(--danger);
+    }
+
+    .logout-btn {
+      width: 100%;
+      padding: 15px;
+      background: rgba(255,255,255,0.1);
+      border: 2px solid rgba(255,255,255,0.2);
+      color: white;
+      border-radius: 15px;
+      cursor: pointer;
+      font-weight: 600;
+      margin-top: 30px;
+      transition: all 0.3s ease;
+    }
+
+    .logout-btn:hover {
+      background: var(--danger);
+      border-color: var(--danger);
+      transform: translateY(-2px);
+    }
+
+    /* Main Content */
+    .main-content {
+      width: 100%;
+      padding: 30px 40px;
+    }
+
+    .page-header { margin-bottom: 20px; }
+
+    .page-title {
+      font-family: 'Righteous', cursive;
+      font-size: 36px;
+      margin-bottom: 10px;
+      color: var(--primary);
+    }
+
+    .page-subtitle { color: #bdc3c7; font-size: 16px; }
+
+    .section { display: none; }
+    .section.active { display: block; }
+
+    /* Search Bar */
+    .search-container {
+      margin-bottom: 30px;
+      position: relative;
+    }
+
+    .search-box {
+      width: 100%;
+      padding: 15px 50px 15px 20px;
+      background: rgba(44,62,80,0.8);
+      border: 2px solid rgba(255,255,255,0.1);
+      border-radius: 50px;
+      color: white;
+      font-size: 16px;
+      font-family: 'Poppins', sans-serif;
+      transition: all 0.3s ease;
+    }
+
+    .search-box:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 5px 20px rgba(231,76,60,0.3);
+    }
+
+    .search-icon {
+      position: absolute;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 24px;
+      color: var(--primary);
+    }
+
+    /* Category Filters */
+    .category-filters {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      padding: 10px 20px;
+      border-radius: 15px;
+      border: 2px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.05);
+      color: white;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      font-size: 14px;
+    }
+
+    .filter-btn:hover { transform: translateY(-2px); }
+
+    .filter-btn.active {
+      background: var(--primary);
+      border-color: var(--primary);
+    }
+    
+    .inventory-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 25px;
+    }
+
+    .inventory-card {
+      display: flex;
+      min-height: 360px;
+      flex-direction: column;
+      gap: 15px;
+      background: rgba(44,62,80,0.85);
+      padding: 20px;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.12);
+      transition: all 0.3s ease;
+    }
+
+    .item-image {
+      height: 160px;
+      border-radius: 16px;
+      object-fit: cover;
+    }
+
+    .item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+    }
+
+    .item-name {
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .item-category {
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 10px;
+      background: rgba(243,156,18,0.15);
+      color: var(--accent);
+      width: fit-content;
+    }
+
+    .item-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 12px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .stock-badge {
+      padding: 6px 14px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .inventory-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 25px rgba(0,0,0,0.35);
+    }
+
+    .icon-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(255,255,255,0.15);
+      color: white;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .icon-btn:hover {
+      background: var(--accent);
+    }
+
+    .icon-btn.danger:hover {
+      background: var(--danger);
+    }
+
+    .icon-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .stock-ok {
+      background: rgba(39,174,96,0.2);
+      color: #2ecc71;
+    }
+
+    .stock-low {
+      background: rgba(243,156,18,0.25);
+      color: #f39c12;
+    }
+
+    .stock-out {
+      background: rgba(231,76,60,0.25);
+      color: #e74c3c;
+    }
+
+    .add-item-btn {
+      background: linear-gradient(135deg, var(--success), #229954);
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      border-radius: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 16px;
+      box-shadow: 0 5px 20px rgba(39,174,96,0.3);
+    }
+
+    /* Raw Materials Section Styles */
+    .raw-materials-panel {
+      background: rgba(44,62,80,0.8);
+      border-radius: 20px;
+      padding: 30px;
+      margin-bottom: 30px;
+      border: 2px solid var(--accent);
+    }
+
+    .raw-materials-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .raw-materials-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 25px;
+    }
+
+    .raw-material-card {
+      background: rgba(0,0,0,0.3);
+      padding: 20px;
+      border-radius: 15px;
+      border: 2px solid rgba(255,255,255,0.1);
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .raw-material-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-3px);
+    }
+
+    .raw-material-icon {
+      font-size: 40px;
+      margin-bottom: 10px;
+    }
+
+    .raw-material-name {
+      font-size: 14px;
+      color: #bdc3c7;
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+
+    .raw-material-input {
+      width: 100%;
+      padding: 12px;
+      background: rgba(0,0,0,0.3);
+      border: 2px solid rgba(255,255,255,0.2);
+      border-radius: 10px;
+      color: white;
+      font-size: 18px;
+      font-weight: 700;
+      text-align: center;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    .raw-material-input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .update-materials-btn {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, var(--accent), #e67e22);
+      color: white;
+      border: none;
+      border-radius: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 20px rgba(243,156,18,0.3);
+    }
+
+    .update-materials-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(243,156,18,0.5);
+    }
+
+    /* Default Meal Badge - LOCKED */
+    .default-meal-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      background: rgba(52,152,219,0.2);
+      color: #3498db;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 600;
+      margin-left: 8px;
+    }
+
+    /* Scanner Section */
+    .scanner-container { max-width: 1000px; margin: 0 auto; }
+
+    .scanner-box {
+      background: rgba(44,62,80,0.8);
+      border-radius: 25px;
+      padding: 40px;
+      text-align: center;
+      border: 3px solid var(--primary);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    }
+
+    #qr-reader {
+      max-width: 600px;
+      margin: 0 auto 30px;
+      border-radius: 20px;
+      overflow: hidden;
+      border: 3px solid var(--primary);
+    }
+
+    .scanner-status {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--accent);
+      margin: 20px 0;
+    }
+
+    /* Manual Order Input */
+    .manual-order-section {
+      margin-top: 30px;
+      padding: 25px;
+      background: rgba(0,0,0,0.2);
+      border-radius: 20px;
+      border: 2px solid rgba(255,255,255,0.1);
+    }
+
+    .manual-order-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 15px;
+    }
+
+    /* Order Details Display */
+    .order-details-container {
+      margin-top: 30px;
+      padding: 30px;
+      background: rgba(39,174,96,0.15);
+      border-radius: 20px;
+      border: 3px solid var(--success);
+      display: none;
+    }
+
+    .order-details-container.active {
+      display: block;
+    }
+
+    .order-header-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid rgba(255,255,255,0.2);
+    }
+
+    .order-student-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .student-avatar {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      border: 3px solid var(--success);
+    }
+
+    .student-details h3 {
+      font-size: 20px;
+      margin-bottom: 5px;
+    }
+
+    .student-details p {
+      font-size: 14px;
+      color: #bdc3c7;
+    }
+
+    .order-id-badge {
+      background: var(--accent);
+      color: var(--dark);
+      padding: 10px 20px;
+      border-radius: 15px;
+      font-weight: 700;
+      font-family: monospace;
+      font-size: 16px;
+    }
+
+    .order-items-list {
+      margin: 20px 0;
+    }
+
+    .order-item {
+      background: rgba(0,0,0,0.3);
+      padding: 15px;
+      border-radius: 12px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .order-item-name {
+      font-weight: 600;
+      font-size: 16px;
+    }
+
+    .order-item-qty {
+      color: var(--accent);
+      font-size: 14px;
+    }
+
+    .order-total-section {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 2px solid rgba(255,255,255,0.2);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .order-total-label {
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .order-total-amount {
+      font-size: 32px;
+      font-weight: 800;
+      color: var(--success);
+      font-family: 'Righteous', cursive;
+    }
+
+    .spacebar-instruction {
+      margin-top: 20px;
+      padding: 20px;
+      background: var(--accent);
+      color: var(--dark);
+      border-radius: 15px;
+      text-align: center;
+      font-weight: 700;
+      font-size: 18px;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.9);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal.active { display: flex; }
+
+    .modal-content {
+      background: #2c3e50;
+      border-radius: 25px;
+      padding: 40px;
+      max-width: 600px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+      border: 3px solid var(--primary);
+    }
+
+    .form-input, .form-select, .form-textarea {
+      width: 100%;
+      padding: 12px 15px;
+      background: rgba(0,0,0,0.3);
+      border: 2px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      color: white;
+      font-family: 'Poppins', sans-serif;
+      font-size: 14px;
+      transition: all 0.3s ease;
+    }
+
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(231,76,60,0.2);
+    }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+
+    .modal-btn {
+      flex: 1;
+      padding: 15px;
+      border: none;
+      border-radius: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 16px;
+    }
+
+    .btn-cancel { background: rgba(255,255,255,0.1); color: white; }
+    .btn-save {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      box-shadow: 0 5px 20px rgba(231,76,60,0.3);
+    }
+
+    .hidden { display: none !important; }
+
+    /* Analytics Styles */
+    .period-btn {
+      padding: 10px 20px;
+      border-radius: 12px;
+      border: 2px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.05);
+      color: white;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      font-size: 14px;
+    }
+
+    .period-btn:hover { transform: translateY(-2px); border-color: var(--primary); }
+    .period-btn.active { background: var(--primary); border-color: var(--primary); }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .metric-card {
+      background: rgba(44,62,80,0.8);
+      border-radius: 20px;
+      padding: 25px;
+      border: 2px solid rgba(255,255,255,0.1);
+      transition: all 0.3s ease;
+    }
+
+    .metric-card:hover {
+      transform: translateY(-5px);
+      border-color: var(--primary);
+      box-shadow: 0 10px 30px rgba(231,76,60,0.3);
+    }
+
+    .metric-icon { font-size: 40px; margin-bottom: 15px; }
+    .metric-label { color: #bdc3c7; font-size: 14px; margin-bottom: 10px; font-weight: 600; }
+    .metric-value { font-size: 32px; font-weight: 800; color: white; font-family: 'Righteous', cursive; margin-bottom: 10px; }
+    .metric-change { font-size: 14px; font-weight: 600; padding: 5px 12px; border-radius: 10px; display: inline-block; }
+    .metric-change.positive { background: rgba(39,174,96,0.2); color: var(--success); }
+    .metric-change.negative { background: rgba(231,76,60,0.2); color: var(--danger); }
+    .metric-change.neutral { background: rgba(255,255,255,0.1); color: #bdc3c7; }
+
+    .charts-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 25px;
+      margin-bottom: 30px;
+    }
+
+    .chart-container {
+      background: rgba(44,62,80,0.8);
+      border-radius: 20px;
+      padding: 25px;
+      border: 2px solid rgba(255,255,255,0.1);
+    }
+
+    .chart-title { color: var(--accent); font-size: 18px; font-weight: 700; margin-bottom: 20px; }
+
+    .analytics-panel {
+      background: rgba(44,62,80,0.8);
+      border-radius: 20px;
+      padding: 25px;
+      border: 2px solid rgba(255,255,255,0.1);
+      margin-bottom: 25px;
+    }
+
+    .panel-title { color: var(--accent); font-size: 20px; font-weight: 700; margin-bottom: 20px; }
+    .top-items-list, .recommendations-list { display: grid; gap: 15px; }
+
+    .top-item {
+      background: rgba(0,0,0,0.3);
+      padding: 15px;
+      border-radius: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-left: 4px solid var(--accent);
+    }
+
+    .top-item-rank { font-size: 24px; font-weight: 800; color: var(--accent); min-width: 40px; }
+    .top-item-info { flex: 1; margin: 0 15px; }
+    .top-item-name { font-weight: 600; font-size: 16px; margin-bottom: 5px; }
+    .top-item-stats { font-size: 12px; color: #bdc3c7; }
+    .top-item-revenue { font-size: 18px; font-weight: 700; color: var(--success); }
+
+    .recommendation-card {
+      background: rgba(0,0,0,0.3);
+      padding: 20px;
+      border-radius: 12px;
+      border-left: 4px solid;
+    }
+
+    .recommendation-card.critical { border-color: #e74c3c; background: rgba(231,76,60,0.1); }
+    .recommendation-card.urgent { border-color: #e67e22; background: rgba(230,126,34,0.1); }
+    .recommendation-card.warning { border-color: #f39c12; background: rgba(243,156,18,0.1); }
+    .recommendation-card.good { border-color: #27ae60; background: rgba(39,174,96,0.1); }
+    .recommendation-card.overstocked { border-color: #3498db; background: rgba(52,152,219,0.1); }
+
+    .recommendation-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .recommendation-item-name { font-weight: 700; font-size: 16px; }
+    .recommendation-status {
+      padding: 5px 12px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .recommendation-status.critical { background: #e74c3c; color: white; }
+    .recommendation-status.urgent { background: #e67e22; color: white; }
+    .recommendation-status.warning { background: #f39c12; color: var(--dark); }
+    .recommendation-status.good { background: #27ae60; color: white; }
+    .recommendation-status.overstocked { background: #3498db; color: white; }
+
+    .recommendation-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+
+    .recommendation-stat { background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px; }
+    .recommendation-stat-label { font-size: 11px; color: #bdc3c7; margin-bottom: 5px; }
+    .recommendation-stat-value { font-size: 16px; font-weight: 700; color: white; }
+    .recommendation-action {
+      background: rgba(255,255,255,0.1);
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .loading { text-align: center; padding: 40px; color: #bdc3c7; font-size: 16px; }
+
+    /* Feedback Section Styles */
+    .feedback-grid {
+      display: grid;
+      gap: 20px;
+    }
+
+    .feedback-card {
+      background: rgba(44,62,80,0.8);
+      border-radius: 20px;
+      padding: 25px;
+      border: 2px solid rgba(255,255,255,0.1);
+      transition: all 0.3s ease;
+    }
+
+    .feedback-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--accent);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    }
+
+    .feedback-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid rgba(255,255,255,0.1);
+    }
+
+    .feedback-user-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .feedback-avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 700;
+      font-size: 20px;
+    }
+
+    .feedback-user-details h4 {
+      font-size: 16px;
+      margin-bottom: 5px;
+    }
+
+    .feedback-user-details p {
+      font-size: 12px;
+      color: #bdc3c7;
+    }
+
+    .feedback-rating {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .star-display {
+      display: flex;
+      gap: 3px;
+    }
+
+    .star-display span {
+      color: #ffd700;
+      font-size: 20px;
+    }
+
+    .star-display span.empty {
+      color: rgba(255,255,255,0.2);
+    }
+
+    .rating-number {
+      background: rgba(255,215,0,0.2);
+      color: #ffd700;
+      padding: 5px 12px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .feedback-category-badge {
+      display: inline-block;
+      padding: 6px 14px;
+      background: rgba(243,156,18,0.2);
+      color: var(--accent);
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      margin-bottom: 15px;
+    }
+
+    .feedback-message {
+      color: #ecf0f1;
+      line-height: 1.8;
+      font-size: 14px;
+      padding: 15px;
+      background: rgba(0,0,0,0.2);
+      border-radius: 10px;
+      margin-bottom: 15px;
+    }
+
+    .feedback-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 15px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .feedback-date {
+      font-size: 12px;
+      color: #95a5a6;
+    }
+
+    .feedback-stats-summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .feedback-stat-card {
+      background: rgba(44,62,80,0.8);
+      border-radius: 15px;
+      padding: 20px;
+      border: 2px solid rgba(255,255,255,0.1);
+      text-align: center;
+    }
+
+    .feedback-stat-icon {
+      font-size: 36px;
+      margin-bottom: 10px;
+    }
+
+    .feedback-stat-value {
+      font-size: 28px;
+      font-weight: 800;
+      color: white;
+      margin-bottom: 5px;
+    }
+
+    .feedback-stat-label {
+      font-size: 13px;
+      color: #bdc3c7;
+      font-weight: 600;
+    }
+
+    .feedback-filter-bar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 25px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .feedback-filter-label {
+      color: var(--accent);
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .feedback-filter-btn {
+      padding: 8px 16px;
+      border-radius: 12px;
+      border: 2px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.05);
+      color: white;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      font-size: 13px;
+    }
+
+    .feedback-filter-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .feedback-filter-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: var(--dark);
+    }
+
+    .no-feedback-message {
+      text-align: center;
+      padding: 60px 20px;
+      color: #95a5a6;
+      font-size: 16px;
+    }
+
+    .no-feedback-message .emoji {
+      font-size: 64px;
+      display: block;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Auth Screen -->
+  <div id="authScreen" class="auth-screen">
+    <div class="auth-logo">
+      <div class="auth-logo-icon">🏪</div>
+      <h1>Vendor Dashboard</h1>
+      <p>Campus Canteen Management</p>
+    </div>
+
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" id="vendorEmail" placeholder="vendor@canteen.com" value="vendor@canteen.com">
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="vendorPassword" placeholder="••••••••" value="vendor123">
+    </div>
+    <button class="auth-btn" onclick="vendorLogin()">Login</button>
+  </div>
+  <!-- Main Dashboard -->
+  <div id="mainDashboard" class="dashboard hidden">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="logo">
+        <div class="logo-icon">🏪</div>
+        <h1>Vendor Dashboard</h1>
+        <p>Campus Canteen</p>
+      </div>
+    
+      <!-- Canteen Code -->
+      <div class="vendor-profile">
+        <div class="canteen-code-label">Your Canteen Code</div>
+        <div id="canteenCodeDisplay">Loading...</div>
+        <button class="copy-code-btn" onclick="copyCanteenCode()">📋 Copy Code</button>
+      </div>
+
+      <ul class="nav-menu">
+        <li class="nav-item">
+          <div class="nav-link active" onclick="switchSection('scanner')">
+            <span class="nav-icon">📱</span>
+            <span class="nav-text">QR Scanner</span>
+          </div>
+        </li>
+        <li class="nav-item">
+          <div class="nav-link" onclick="switchSection('rawMaterials')">
+            <span class="nav-icon">🥘</span>
+            <span class="nav-text">Raw Materials</span>
+          </div>
+        </li>
+        <li class="nav-item">
+          <div class="nav-link" onclick="switchSection('inventory')">
+            <span class="nav-icon">📦</span>
+            <span class="nav-text">Menu Items</span>
+          </div>
+        </li>
+        <li class="nav-item">
+          <div class="nav-link" onclick="switchSection('analytics')">
+            <span class="nav-icon">📊</span>
+            <span class="nav-text">Analytics</span>
+          </div>
+        </li>
+        <li class="nav-item">
+          <div class="nav-link" onclick="switchSection('feedback')">
+            <span class="nav-icon">💬</span>
+            <span class="nav-text">Feedback</span>
+          </div>
+        </li>
+      </ul>
+
+      <div class="low-stock-panel">
+        <div class="low-stock-title">
+          <span>⚠️</span>
+          <span>Low Stock Alert</span>
+        </div>
+        <div id="lowStockItems"></div>
+      </div>
+
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <!-- Scanner Section -->
+      <div id="scannerSection" class="section active">
+        <div class="page-header">
+          <h1 class="page-title">Live Kitchen Scanner</h1>
+          <p class="page-subtitle">Scan student QR codes or enter Order ID to view orders</p>
+        </div>
+
+        <div class="scanner-container">
+          <div class="scanner-box">
+            <div id="qr-reader"></div>
+            <div class="scanner-status" id="scannerStatus">📷 Scanner Ready</div>
+          </div>
+
+          <!-- Manual Order Input -->
+          <div class="manual-order-section">
+            <h3 class="manual-order-title">📝 Manual Order Entry</h3>
+            <input type="text" id="manualOrderId" placeholder="Enter Order ID (e.g., ORD_1234567890)" 
+                   style="width: 100%; padding: 15px; border-radius: 12px; border: 2px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.3); color: white; margin-bottom: 15px; font-family: 'Poppins', sans-serif;">
+            <button onclick="fetchManualOrder()" 
+                    style="width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; transition: all 0.3s ease;">
+              🔍 Load Order
+            </button>
+          </div>
+
+          <!-- Order Details Display -->
+          <div id="orderDetailsContainer" class="order-details-container">
+            <div class="order-header-info">
+              <div class="order-student-info">
+                <img id="studentAvatar" class="student-avatar" src="" alt="Student">
+                <div class="student-details">
+                  <h3 id="studentName">Loading...</h3>
+                  <p id="studentEmail">Loading...</p>
+                </div>
+              </div>
+              <div class="order-id-badge" id="displayOrderId">ORDER ID</div>
+            </div>
+
+            <div class="order-items-list" id="orderItemsList">
+              <!-- Items will be populated here -->
+            </div>
+
+            <div class="order-total-section">
+              <div class="order-total-label">Total Amount:</div>
+              <div class="order-total-amount" id="orderTotalAmount">₹0</div>
+            </div>
+
+            <div class="spacebar-instruction">
+              ⌨️ Press SPACEBAR to mark as delivered
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ✅ Raw Materials Section -->
+      <div id="rawMaterialsSection" class="section">
+        <div class="page-header">
+          <h1 class="page-title">🥘 Raw Materials Management</h1>
+          <p class="page-subtitle">Update stock of raw ingredients - default meals are auto-calculated</p>
+        </div>
+
+        <div class="raw-materials-panel">
+          <div class="raw-materials-title">
+            <span>📦</span>
+            <span>Current Raw Material Stock</span>
+          </div>
+
+          <div class="raw-materials-grid">
+            <div class="raw-material-card">
+              <div class="raw-material-icon">🍚</div>
+              <div class="raw-material-name">Rice (plates)</div>
+              <input type="number" id="riceStock" class="raw-material-input" min="0" value="0">
+            </div>
+
+            <div class="raw-material-card">
+              <div class="raw-material-icon">🍗</div>
+              <div class="raw-material-name">Chicken (portions)</div>
+              <input type="number" id="chickenStock" class="raw-material-input" min="0" value="0">
+            </div>
+
+            <div class="raw-material-card">
+              <div class="raw-material-icon">🥚</div>
+              <div class="raw-material-name">Egg (pieces)</div>
+              <input type="number" id="eggStock" class="raw-material-input" min="0" value="0">
+            </div>
+
+            <div class="raw-material-card">
+              <div class="raw-material-icon">🥦</div>
+              <div class="raw-material-name">Veg (portions)</div>
+              <input type="number" id="vegStock" class="raw-material-input" min="0" value="0">
+            </div>
+
+            <div class="raw-material-card">
+              <div class="raw-material-icon">🍜</div>
+              <div class="raw-material-name">Noodles (portions)</div>
+              <input type="number" id="noodlesStock" class="raw-material-input" min="0" value="0">
+            </div>
+          </div>
+
+          <button class="update-materials-btn" onclick="updateRawMaterials()">
+            💾 Update Raw Materials Stock
+          </button>
+        </div>
+
+        <div style="background: rgba(52,152,219,0.15); padding: 20px; border-radius: 15px; border: 2px solid #3498db; margin-top: 20px;">
+          <h3 style="color: #3498db; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+            <span>ℹ️</span>
+            <span>Default Meals System - Client-Side Only</span>
+          </h3>
+          <div style="color: #ecf0f1; line-height: 1.8;">
+            <p style="margin-bottom: 10px;"><strong>🔒 Default Meals (Auto-Generated by Student App):</strong></p>
+            <ul style="margin-left: 20px; margin-bottom: 15px;">
+              <li><strong>Veg Fried Rice</strong> = Rice (1) + Veg (1) - Stock: min(rice, veg)</li>
+              <li><strong>Veg Fried Noodles</strong> = Noodles (1) + Veg (1) - Stock: min(noodles, veg)</li>
+              <li>These meals are NOT stored in vendor database</li>
+              <li>Student app generates them dynamically from raw materials</li>
+              <li>Vendor CANNOT edit them - only update raw materials</li>
+            </ul>
+            <p style="margin-bottom: 10px;"><strong>🍳 Add-ons (Optional for Default Meals Only):</strong></p>
+            <ul style="margin-left: 20px; margin-bottom: 15px;">
+              <li>Students can add: Egg (+₹15) or Chicken (+₹30)</li>
+              <li>Veg is ALWAYS included automatically (no checkbox, no charge)</li>
+              <li>Add-ons reduce stock ONLY when selected</li>
+            </ul>
+            <p style="margin-bottom: 10px;"><strong>📊 Example Flow:</strong></p>
+            <ul style="margin-left: 20px;">
+              <li>Rice = 10, Veg = 8 → Student sees "Veg Fried Rice: 8 available"</li>
+              <li>Student orders 1 Rice + Egg → Backend deducts: Rice-1, Veg-1, Egg-1</li>
+              <li>New stock: Rice=9, Veg=7, Egg reduces → Next student sees 7 available</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Inventory Section -->
+      <div id="inventorySection" class="section">
+        <div class="page-header">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <h1 class="page-title">Regular Menu Items</h1>
+              <p class="page-subtitle">Manage your regular menu (default meals are in Raw Materials section)</p>
+            </div>
+            <button class="add-item-btn" onclick="showAddItemModal()">➕ Add New Item</button>
+          </div>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="search-container">
+          <input type="text" class="search-box" placeholder="🔍 Search menu items..." onkeyup="searchInventory(this.value)">
+          <span class="search-icon">🔍</span>
+        </div>
+
+        <div class="category-filters" id="categoryFilters"></div>
+        <div class="inventory-grid" id="inventoryGrid"></div>
+      </div>
+
+      <!-- Analytics Section -->
+      <div id="analyticsSection" class="section">
+        <div class="page-header">
+          <h1 class="page-title">📊 Sales Analytics & Insights</h1>
+          <p class="page-subtitle">Track performance and get smart recommendations</p>
+        </div>
+
+        <!-- Period Selector -->
+        <div style="margin-bottom: 30px;">
+          <div style="display: flex; gap: 10px;">
+            <button class="period-btn active" onclick="changePeriod('week')" data-period="week">This Week</button>
+            <button class="period-btn" onclick="changePeriod('month')" data-period="month">This Month</button>
+            <button class="period-btn" onclick="changePeriod('year')" data-period="year">This Year</button>
+          </div>
+        </div>
+
+        <!-- Key Metrics Cards -->
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <div class="metric-icon">💰</div>
+            <div class="metric-label">Total Revenue</div>
+            <div class="metric-value" id="totalRevenue">₹0</div>
+            <div class="metric-change neutral" id="revenueChange">—</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-icon">🛒</div>
+            <div class="metric-label">Total Orders</div>
+            <div class="metric-value" id="totalOrders">0</div>
+            <div class="metric-change neutral" id="ordersChange">—</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-icon">📈</div>
+            <div class="metric-label">Avg Order Value</div>
+            <div class="metric-value" id="avgOrderValue">₹0</div>
+            <div class="metric-change neutral" id="avgChange">—</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-icon">👥</div>
+            <div class="metric-label">Unique Customers</div>
+            <div class="metric-value" id="uniqueCustomers">0</div>
+            <div class="metric-change neutral" id="customersChange">—</div>
+          </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="charts-row">
+          <div class="chart-container">
+            <h3 class="chart-title">📈 Sales Trend (Last 7 Days)</h3>
+            <canvas id="salesTrendChart"></canvas>
+          </div>
+          <div class="chart-container">
+            <h3 class="chart-title">🎯 Category Performance</h3>
+            <canvas id="categoryChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Peak Hours Chart -->
+        <div class="chart-container" style="margin-bottom: 30px;">
+          <h3 class="chart-title">⏰ Peak Hours Analysis</h3>
+          <canvas id="peakHoursChart"></canvas>
+        </div>
+
+        <!-- Top Selling Items -->
+        <div class="analytics-panel">
+          <h3 class="panel-title">🏆 Top Selling Items</h3>
+          <div id="topItemsList" class="top-items-list">
+            <div class="loading">Loading...</div>
+          </div>
+        </div>
+
+        <!-- Smart Recommendations -->
+        <div class="analytics-panel">
+          <h3 class="panel-title">💡 Smart Stock Recommendations</h3>
+          <div id="recommendationsList" class="recommendations-list">
+            <div class="loading">Loading...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feedback Section -->
+      <div id="feedbackSection" class="section">
+        <div class="page-header">
+          <h1 class="page-title">💬 Customer Feedback & Ratings</h1>
+          <p class="page-subtitle">See what your customers are saying</p>
+        </div>
+
+        <!-- Feedback Stats Summary -->
+        <div class="feedback-stats-summary">
+          <div class="feedback-stat-card">
+            <div class="feedback-stat-icon">⭐</div>
+            <div class="feedback-stat-value" id="avgRating">0.0</div>
+            <div class="feedback-stat-label">Average Rating</div>
+          </div>
+          <div class="feedback-stat-card">
+            <div class="feedback-stat-icon">💬</div>
+            <div class="feedback-stat-value" id="totalFeedback">0</div>
+            <div class="feedback-stat-label">Total Feedback</div>
+          </div>
+          <div class="feedback-stat-card">
+            <div class="feedback-stat-icon">🔥</div>
+            <div class="feedback-stat-value" id="recentFeedback">0</div>
+            <div class="feedback-stat-label">This Week</div>
+          </div>
+        </div>
+
+        <!-- Feedback Filters -->
+        <div class="feedback-filter-bar">
+          <span class="feedback-filter-label">Filter by Rating:</span>
+          <button class="feedback-filter-btn active" onclick="filterFeedback('all')" data-filter="all">All</button>
+          <button class="feedback-filter-btn" onclick="filterFeedback('5')" data-filter="5">⭐ 5 Stars</button>
+          <button class="feedback-filter-btn" onclick="filterFeedback('4')" data-filter="4">⭐ 4 Stars</button>
+          <button class="feedback-filter-btn" onclick="filterFeedback('3')" data-filter="3">⭐ 3 Stars</button>
+          <button class="feedback-filter-btn" onclick="filterFeedback('2')" data-filter="2">⭐ 2 Stars</button>
+          <button class="feedback-filter-btn" onclick="filterFeedback('1')" data-filter="1">⭐ 1 Star</button>
+        </div>
+
+        <!-- Feedback List -->
+        <div class="feedback-grid" id="feedbackList">
+          <div class="loading">Loading feedback...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stock Editor Modal -->
+  <div id="stockEditorModal" class="modal">
+    <div class="modal-content" style="max-width: 400px;">
+      <h2 style="color: var(--primary); margin-bottom: 20px;">Update Stock</h2>
+      <p style="color: #bdc3c7; margin-bottom: 10px;" id="stockEditorNote">
+        Current Stock: <span id="currentStock" style="color: white; font-weight: bold;"></span>
+      </p>
+      <input type="number" id="newStockValue" min="0" class="form-input" 
+             style="margin-bottom: 20px;" placeholder="Enter new stock quantity">
+      <div style="display: flex; gap: 15px;">
+        <button onclick="closeStockEditor()" class="modal-btn btn-cancel">Cancel</button>
+        <button onclick="updateStockValue()" class="modal-btn btn-save">Update</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add/Edit Item Modal -->
+  <div id="itemModal" class="modal">
+    <div class="modal-content">
+      <h2 style="color: var(--primary); margin-bottom: 30px; font-family: 'Righteous', cursive;" id="modalTitle">Add New Item</h2>
+
+      <form id="itemForm">
+        <div style="margin-bottom: 20px;">
+          <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #bdc3c7;">Item Name</label>
+          <input type="text" id="itemName" class="form-input" required>
+        </div>
+
+        <div class="form-row">
+          <div>
+            <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #bdc3c7;">Price (₹)</label>
+            <input type="number" id="itemPrice" class="form-input" min="0" step="0.01" required>
+          </div>
+          <div>
+            <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #bdc3c7;">Category</label>
+            <select id="itemCategory" class="form-select" required>
+              <option value="Snacks">Snacks</option>
+              <option value="Meals">Meals</option>
+              <option value="Beverages">Beverages</option>
+              <option value="Desserts">Desserts</option>
+              <option value="Stationery">Stationery</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row" style="margin-top: 20px;">
+          <div>
+            <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #bdc3c7;">Stock Quantity</label>
+            <input type="number" id="itemStock" class="form-input" min="0" required>
+          </div>
+          <div>
+            <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #bdc3c7;">Low Stock Alert</label>
+            <input type="number" id="itemThreshold" class="form-input" min="0" value="5" required>
+          </div>
+        </div>
+
+        <div style="margin: 20px 0;">
+          <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #bdc3c7;">Image URL</label>
+          <input type="url" id="itemImageUrl" class="form-input" placeholder="https://example.com/image.jpg">
+          <small style="font-size: 12px; color: #bdc3c7; margin-top: 5px; display: block;">Paste image URL from Unsplash, Google, etc.</small>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+          <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #bdc3c7;">Description</label>
+          <textarea id="itemDescription" class="form-textarea" placeholder="Brief description"></textarea>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+          <label style="display: flex; align-items: center; gap: 10px; color: #bdc3c7; cursor: pointer;">
+            <input type="checkbox" id="isMealLocked" style="width: 20px; height: 20px; cursor: pointer;">
+            <span>Enable Meal Time Lock (for lunch/dinner items)</span>
+          </label>
+        </div>
+
+        <div id="mealTimeFields" class="hidden">
+          <div class="form-row">
+            <div>
+              <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #bdc3c7;">Start Time</label>
+              <input type="time" id="mealStartTime" class="form-input" value="12:00">
+            </div>
+            <div>
+              <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #bdc3c7;">End Time</label>
+              <input type="time" id="mealEndTime" class="form-input" value="14:30">
+            </div>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 15px; margin-top: 30px;">
+          <button type="button" class="modal-btn btn-cancel" onclick="closeItemModal()">Cancel</button>
+          <button type="submit" class="modal-btn btn-save">Save Item</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/html5-qrcode"></script>
+  <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    // ===================================================================
+    // VENDOR DASHBOARD - ALIGNED WITH STUDENT-SIDE DEFAULT MEALS LOGIC
+    // ===================================================================
+    
+    const API_URL = 'http://localhost:3001/api';
+    let token = localStorage.getItem('vendor_token');
+    let currentEditingItemId = null;
+    let editingItemId = null;
+    let html5QrCode;
+    let socket;
+    let currentFilterCategory = 'all';
+    let currentOrderId = null;
+    let currentPeriod = 'week';
+    let salesTrendChart, categoryChart, peakHoursChart;
+    let allFeedback = [];
+    let currentFeedbackFilter = 'all';
+    let currentRawMaterials = {};
+
+    // Initialize
+    if (token) {
+      document.getElementById('authScreen').classList.add('hidden');
+      document.getElementById('mainDashboard').classList.remove('hidden');
+      initDashboard();
+    } else {
+      document.getElementById('authScreen').classList.remove('hidden');
+      document.getElementById('mainDashboard').classList.add('hidden');
+    }
+
+    // ========== SPACEBAR EVENT LISTENER ==========
+    document.addEventListener('keydown', function (event) {
+  if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) {
+    return;
+  }
+
+  if (
+    event.code === 'Space' &&
+    currentOrderId &&
+    document.getElementById('orderDetailsContainer').classList.contains('active')
+  ) {
+    event.preventDefault();
+    completeCurrentOrder();
+  }
+});
+
+
+
+    // ========== COMPLETE ORDER FUNCTION ==========
+    // ========== COMPLETE ORDER FUNCTION ==========
+async function completeCurrentOrder() {
+  if (!currentOrderId) {
+    alert('No order loaded');
+    return;
+  }
+
+  try {
+    console.log('📦 Attempting to complete order:', currentOrderId);
+    
+    const response = await fetch(`${API_URL}/vendor/orders/${currentOrderId}/complete`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    const data = await response.json();
+    console.log('Response:', data);
+
+    if (response.ok && data.success) {
+      // Hide order details
+      document.getElementById('orderDetailsContainer').classList.remove('active');
+      document.getElementById('scannerStatus').textContent = '✅ Order Completed!';
+      currentOrderId = null;
+      
+      setTimeout(() => {
+        document.getElementById('scannerStatus').textContent = '📷 Scanner Ready - Scan next order';
+      }, 3000);
+      
+      // Show success message
+      alert(`✅ Order ${data.orderId} marked as delivered!`);
+      
+      // Refresh stock displays
+      loadRawMaterials();
+      loadInventory(currentFilterCategory);
+      loadLowStock();
+    } else {
+      console.error('Failed to complete order:', data);
+      alert('Failed to complete order: ' + (data.error || 'Unknown error'));
+    }
+  } catch (error) {
+    console.error('Error completing order:', error);
+    alert('Error completing order: ' + error.message);
+  }
+}
+
+    // ========== VENDOR LOGIN ==========
+    async function vendorLogin() {
+      const email = document.getElementById('vendorEmail').value;
+      const password = document.getElementById('vendorPassword').value;
+
+      try {
+        let response = await fetch(`${API_URL}/auth/vendor-login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password, role: 'vendor' })
+        });
+
+        if (response.status === 404) {
+          response = await fetch(`${API_URL}/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+          });
+        }
+
+        const text = await response.text();
+        let data;
+    
+        try {
+          data = JSON.parse(text);
+        } catch (e) {
+          console.error('Invalid JSON response:', text);
+          alert('Server error: Invalid response format');
+          return;
+        }
+
+        if (response.ok && data.token) {
+          token = data.token;
+          localStorage.setItem('vendor_token', token);
+          document.getElementById('authScreen').classList.add('hidden');
+          document.getElementById('mainDashboard').classList.remove('hidden');
+          initDashboard();
+        } else {
+          alert(data.error || 'Login failed. Please check your credentials.');
+        }
+      } catch (error) {
+        console.error('Login error:', error);
+        alert('Login error: ' + error.message);
+      }
+    }
+
+    // ========== INIT DASHBOARD ==========
+    function initDashboard() {
+      socket = io('http://localhost:3001');
+      
+      socket.on('stock-updated', () => {
+        console.log('📢 Stock updated event received');
+        loadInventory(currentFilterCategory);
+        loadLowStock();
+        loadRawMaterials();
+      });
+
+      socket.on('order-completed', (data) => {
+        console.log('Order completed:', data.orderId);
+        const qrOrderId = document.getElementById('displayOrderId')?.textContent;
+        if (qrOrderId === data.orderId) {
+          document.getElementById('orderDetailsContainer').classList.remove('active');
+        }
+      });
+
+      loadCanteenCode();
+      loadRawMaterials();
+      loadInventory();
+      loadLowStock();
+      startScanner();
+    }
+
+    // ========== LOAD CANTEEN CODE ==========
+    async function loadCanteenCode() {
+      try {
+        const response = await fetch(`${API_URL}/vendor/canteen-code`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await response.json();
+        document.getElementById('canteenCodeDisplay').textContent = data.canteenCode;
+      } catch (error) {
+        console.error('Error loading canteen code:', error);
+      }
+    }
+
+    function copyCanteenCode() {
+      const code = document.getElementById('canteenCodeDisplay').textContent;
+      navigator.clipboard.writeText(code).then(() => alert('Code copied!'));
+    }
+
+    // ========== SWITCH SECTION ==========
+    function switchSection(section) {
+      document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+      event.target.closest('.nav-link').classList.add('active');
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      
+      if (section === 'scanner') {
+        document.getElementById('scannerSection').classList.add('active');
+      } else if (section === 'rawMaterials') {
+        document.getElementById('rawMaterialsSection').classList.add('active');
+        loadRawMaterials();
+      } else if (section === 'inventory') {
+        document.getElementById('inventorySection').classList.add('active');
+      } else if (section === 'analytics') {
+        document.getElementById('analyticsSection').classList.add('active');
+        loadAnalytics(currentPeriod);
+      } else if (section === 'feedback') {
+        document.getElementById('feedbackSection').classList.add('active');
+        loadFeedback();
+      }
+    }
+
+    // ========== ✅ LOAD RAW MATERIALS ==========
+    async function loadRawMaterials() {
+      try {
+        const response = await fetch(`${API_URL}/raw-materials`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (response.ok) {
+          currentRawMaterials = await response.json();
+          document.getElementById('riceStock').value = currentRawMaterials.rice || 0;
+          document.getElementById('chickenStock').value = currentRawMaterials.chicken || 0;
+          document.getElementById('eggStock').value = currentRawMaterials.egg || 0;
+          document.getElementById('vegStock').value = currentRawMaterials.veg || 0;
+          document.getElementById('noodlesStock').value = currentRawMaterials.noodles || 0;
+        }
+      } catch (error) {
+        console.error('Error loading raw materials:', error);
+      }
+    }
+
+    // ========== ✅ UPDATE RAW MATERIALS ==========
+    async function updateRawMaterials() {
+      const rice = parseInt(document.getElementById('riceStock').value) || 0;
+      const chicken = parseInt(document.getElementById('chickenStock').value) || 0;
+      const egg = parseInt(document.getElementById('eggStock').value) || 0;
+      const veg = parseInt(document.getElementById('vegStock').value) || 0;
+      const noodles = parseInt(document.getElementById('noodlesStock').value) || 0;
+
+      try {
+        const response = await fetch(`${API_URL}/raw-materials`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ rice, chicken, egg, veg, noodles })
+        });
+
+        if (response.ok) {
+          alert('✅ Raw materials updated successfully!\n\nDefault meal availability will be recalculated on student side.');
+          loadRawMaterials();
+          loadLowStock();
+        } else {
+          alert('Failed to update raw materials');
+        }
+      } catch (error) {
+        console.error('Error updating raw materials:', error);
+        alert('Error: ' + error.message);
+      }
+    }
+
+    // ========== ✅ LOAD INVENTORY (ONLY REGULAR ITEMS) ==========
+    async function loadInventory(filterCategory = 'all') {
+      try {
+        currentFilterCategory = filterCategory;
+        const response = await fetch(`${API_URL}/menu`);
+        let items = await response.json();
+
+        // Filter by category if needed
+        if (filterCategory !== 'all') {
+          items = items.filter(item => item.category === filterCategory);
+        }
+
+        // Render category filters
+        const filterBar = document.getElementById('categoryFilters');
+        const categories = ['all', 'Snacks', 'Meals', 'Beverages', 'Desserts', 'Stationery'];
+        filterBar.innerHTML = categories.map(cat => `
+          <button class="filter-btn ${filterCategory === cat ? 'active' : ''}" 
+                  onclick="loadInventory('${cat}')">
+            ${cat === 'all' ? 'All Items' : cat}
+          </button>
+        `).join('');
+
+        // Render items
+        const grid = document.getElementById('inventoryGrid');
+        
+        if (items.length === 0) {
+          grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #bdc3c7; padding: 40px;">No items in this category. Add new items to get started!</div>';
+          return;
+        }
+
+        grid.innerHTML = items.map(item => {
+          const stockClass =
+            item.stock === 0 ? 'stock-out' :
+            item.stock <= item.threshold ? 'stock-low' :
+            'stock-ok';
+
+          return `
+            <div class="inventory-card ${stockClass}">
+              ${item.image_url ? `<img src="${item.image_url}" class="item-image" alt="${item.name}">` : ''}
+
+              <div class="item-header">
+                <div>
+                  <div class="item-name">${item.name}</div>
+                  <div class="item-category">${item.category}</div>
+                </div>
+
+                <div style="display:flex; gap:8px;">
+                  <button onclick="editItem('${item.id}')" class="icon-btn" title="Edit Item">✏️</button>
+                  <button onclick="deleteItem('${item.id}')" class="icon-btn danger" title="Delete Item">🗑️</button>
+                </div>
+              </div>
+
+              ${item.is_meal_locked ? `
+                <div style="font-size:12px;color:#f39c12;">🔒 ${item.meal_start_time} - ${item.meal_end_time}</div>
+              ` : ''}
+
+              <div class="item-footer">
+                <div style="font-size:22px;font-weight:800;color:var(--primary);">
+                  ₹${item.price}
+                </div>
+
+                <div>
+                  <div class="stock-badge" style="
+                    background:${item.stock === 0 ? '#e74c3c' : item.stock <= item.threshold ? '#f39c12' : '#27ae60'};
+                    color:white;">
+                    Stock: ${item.stock}
+                  </div>
+
+                  <button onclick="showStockEditor('${item.id}', ${item.stock})"
+                    style="margin-top:8px;font-size:12px;padding:6px 12px;border-radius:10px;background:rgba(255,255,255,0.1);border:none;color:white;cursor:pointer;">
+                    Edit
+                  </button>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      } catch (error) {
+        console.error('Error loading inventory:', error);
+      }
+    }
+
+    // ========== SEARCH INVENTORY ==========
+    function searchInventory(query) {
+      query = query.toLowerCase();
+      const cards = document.querySelectorAll('.inventory-card');
+      cards.forEach(card => {
+        const text = card.textContent.toLowerCase();
+        card.style.display = text.includes(query) ? '' : 'none';
+      });
+    }
+
+    // ========== STOCK EDITOR ==========
+    function showStockEditor(itemId, currentStock) {
+      currentEditingItemId = itemId;
+      document.getElementById('currentStock').textContent = currentStock;
+      document.getElementById('newStockValue').value = currentStock;
+      document.getElementById('stockEditorModal').classList.add('active');
+    }
+
+    function closeStockEditor() {
+      document.getElementById('stockEditorModal').classList.remove('active');
+    }
+
+    async function updateStockValue() {
+      const newStock = parseInt(document.getElementById('newStockValue').value);
+      if (isNaN(newStock) || newStock < 0) return alert('Invalid stock number');
+      
+      try {
+        const menuResponse = await fetch(`${API_URL}/menu`);
+        const allItems = await menuResponse.json();
+        const currentItem = allItems.find(item => item.id === currentEditingItemId);
+        
+        if (!currentItem) {
+          return alert('Item not found');
+        }
+        
+        const response = await fetch(`${API_URL}/menu/${currentEditingItemId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            name: currentItem.name,
+            price: currentItem.price,
+            category: currentItem.category,
+            stock: newStock,
+            threshold: currentItem.threshold,
+            imageUrl: currentItem.image_url,
+            description: currentItem.description,
+            is_meal_locked: currentItem.is_meal_locked,
+            meal_start_time: currentItem.meal_start_time,
+            meal_end_time: currentItem.meal_end_time
+          })
+        });
+        
+        if (response.ok) {
+          closeStockEditor();
+          loadInventory(currentFilterCategory);
+          loadLowStock();
+          alert('Stock updated!');
+        }
+      } catch (error) {
+        alert('Error: ' + error.message);
+      }
+    }
+
+    // ========== ADD/EDIT ITEM MODAL ==========
+    function showAddItemModal() {
+      editingItemId = null;
+      document.getElementById('modalTitle').textContent = 'Add New Item';
+      document.getElementById('itemForm').reset();
+      document.getElementById('isMealLocked').checked = false;
+      document.getElementById('mealTimeFields').classList.add('hidden');
+      document.getElementById('itemModal').classList.add('active');
+    }
+
+    function closeItemModal() {
+      document.getElementById('itemModal').classList.remove('active');
+    }
+
+    async function editItem(itemId) {
+      editingItemId = itemId;
+      try {
+        const response = await fetch(`${API_URL}/menu`);
+        const items = await response.json();
+        const item = items.find(i => i.id === itemId);
+
+        if (item) {
+          document.getElementById('modalTitle').textContent = 'Edit Item';
+          document.getElementById('itemName').value = item.name;
+          document.getElementById('itemPrice').value = item.price;
+          document.getElementById('itemCategory').value = item.category;
+          document.getElementById('itemStock').value = item.stock;
+          document.getElementById('itemThreshold').value = item.threshold;
+          document.getElementById('itemImageUrl').value = item.image_url || '';
+          document.getElementById('itemDescription').value = item.description || '';
+          document.getElementById('isMealLocked').checked = Boolean(item.is_meal_locked);
+          document.getElementById('mealStartTime').value = item.meal_start_time || '12:00';
+          document.getElementById('mealEndTime').value = item.meal_end_time || '14:30';
+          
+          if (item.is_meal_locked) {
+            document.getElementById('mealTimeFields').classList.remove('hidden');
+          }
+          
+          document.getElementById('itemModal').classList.add('active');
+        }
+      } catch (error) {
+        console.error('Error loading item:', error);
+      }
+    }
+
+    async function deleteItem(itemId) {
+      if (!confirm('Delete this item?')) return;
+      
+      try {
+        const response = await fetch(`${API_URL}/menu/${itemId}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (response.ok) {
+          loadInventory(currentFilterCategory);
+          loadLowStock();
+          alert('Item deleted successfully');
+        }
+      } catch (error) {
+        console.error('Error deleting item:', error);
+      }
+    }
+
+    // ========== MEAL TIME LOCK TOGGLE ==========
+    document.getElementById('isMealLocked').addEventListener('change', function() {
+      const fields = document.getElementById('mealTimeFields');
+      if (this.checked) {
+        fields.classList.remove('hidden');
+      } else {
+        fields.classList.add('hidden');
+      }
+    });
+
+    // ========== ITEM FORM SUBMIT ==========
+    document.getElementById('itemForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const isMealLocked = document.getElementById('isMealLocked').checked;
+      
+      const itemData = {
+        name: document.getElementById('itemName').value,
+        price: parseFloat(document.getElementById('itemPrice').value),
+        category: document.getElementById('itemCategory').value,
+        stock: parseInt(document.getElementById('itemStock').value),
+        threshold: parseInt(document.getElementById('itemThreshold').value),
+        imageUrl: document.getElementById('itemImageUrl').value || null,
+        description: document.getElementById('itemDescription').value,
+        is_meal_locked: isMealLocked ? 1 : 0,
+        meal_start_time: isMealLocked ? document.getElementById('mealStartTime').value : null,
+        meal_end_time: isMealLocked ? document.getElementById('mealEndTime').value : null
+      };
+
+      try {
+        const url = editingItemId ? `${API_URL}/menu/${editingItemId}` : `${API_URL}/menu`;
+        const method = editingItemId ? 'PUT' : 'POST';
+        
+        const response = await fetch(url, {
+          method,
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(itemData)
+        });
+
+        if (response.ok) {
+          closeItemModal();
+          loadInventory(currentFilterCategory);
+          loadLowStock();
+          alert(editingItemId ? 'Item updated!' : 'Item added!');
+        } else {
+          const error = await response.json();
+          alert('Error: ' + (error.error || 'Failed to save item'));
+        }
+      } catch (error) {
+        alert('Error: ' + error.message);
+      }
+    });
+
+    // ========== ✅ LOAD LOW STOCK (REGULAR ITEMS + RAW MATERIALS) ==========
+    async function loadLowStock() {
+      try {
+        // Load regular menu items low stock
+        const menuResponse = await fetch(`${API_URL}/menu/low-stock`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const menuItems = await menuResponse.json();
+
+        // Load raw materials
+        const rawResponse = await fetch(`${API_URL}/raw-materials`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const rawMats = await rawResponse.json();
+
+        const container = document.getElementById('lowStockItems');
+        let alerts = [];
+
+        // Add menu item alerts
+        menuItems.forEach(item => {
+          alerts.push({
+            name: item.name,
+            stock: item.stock,
+            type: 'menu'
+          });
+        });
+
+        // Add raw material alerts (threshold: 5)
+        const RAW_THRESHOLD = 5;
+        if (rawMats.rice <= RAW_THRESHOLD) alerts.push({ name: 'Rice 🍚', stock: rawMats.rice, type: 'raw' });
+        if (rawMats.noodles <= RAW_THRESHOLD) alerts.push({ name: 'Noodles 🍜', stock: rawMats.noodles, type: 'raw' });
+        if (rawMats.veg <= RAW_THRESHOLD) alerts.push({ name: 'Veg 🥦', stock: rawMats.veg, type: 'raw' });
+        if (rawMats.egg <= RAW_THRESHOLD) alerts.push({ name: 'Egg 🥚', stock: rawMats.egg, type: 'raw' });
+        if (rawMats.chicken <= RAW_THRESHOLD) alerts.push({ name: 'Chicken 🍗', stock: rawMats.chicken, type: 'raw' });
+
+        if (alerts.length === 0) {
+          container.innerHTML = '<div style="color: #bdc3c7; text-align: center; padding: 10px;">All stock levels are good!</div>';
+          return;
+        }
+
+        container.innerHTML = alerts.map(alert => `
+          <div class="low-stock-item">
+            <div style="font-weight: 600; font-size: 14px; margin-bottom: 5px;">
+              ${alert.name}
+            </div>
+            <div style="font-size: 12px; color: var(--accent);">
+              ${alert.stock === 0 ? 'OUT OF STOCK' : `Only ${alert.stock} left`}
+              ${alert.type === 'raw' ? ' (affects default meals)' : ''}
+            </div>
+          </div>
+        `).join('');
+      } catch (error) {
+        console.error('Error loading low stock:', error);
+      }
+    }
+
+    // ========== QR SCANNER ==========
+    function startScanner() {
+      html5QrCode = new Html5Qrcode("qr-reader");
+      const config = { fps: 10, qrbox: { width: 300, height: 300 } };
+      
+      html5QrCode.start(
+        { facingMode: "environment" }, 
+        config, 
+        onScanSuccess, 
+        () => {}
+      ).catch(err => {
+        console.log('Camera not available, using manual input only');
+        document.getElementById('scannerStatus').textContent = '📝 Manual Entry Only - Enter Order ID below';
+      });
+    }
+
+    async function onScanSuccess(decodedText) {
+      console.log('QR Scanned:', decodedText);
+      
+      try {
+        const qrData = JSON.parse(decodedText);
+        if (qrData.orderId) {
+          await displayOrderDetails(qrData.orderId);
+        }
+      } catch (error) {
+        console.error('Error parsing QR code:', error);
+        document.getElementById('scannerStatus').textContent = '❌ Invalid QR Code';
+      }
+    }
+
+    async function fetchManualOrder() {
+      const orderId = document.getElementById('manualOrderId').value.trim();
+      if (!orderId) return alert('Please enter an Order ID');
+      await displayOrderDetails(orderId);
+    }
+
+    // ========== ✅ DISPLAY ORDER DETAILS ==========
+    async function displayOrderDetails(orderId) {
+      try {
+        console.log('Fetching order:', orderId);
+        document.getElementById('scannerStatus').textContent = '🔍 Loading order...';
+        
+        const response = await fetch(`${API_URL}/orders/${orderId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Order not found');
+        }
+
+        const order = await response.json();
+        console.log('Order data received:', order);
+
+        if (order.status !== 'active') {
+          alert(`Order ${orderId} is already ${order.status}`);
+          document.getElementById('scannerStatus').textContent = '📷 Scanner Ready';
+          return;
+        }
+
+        currentOrderId = orderId;
+
+        // Display student info
+        const studentAvatar = document.getElementById('studentAvatar');
+        const studentName = document.getElementById('studentName');
+        const studentEmail = document.getElementById('studentEmail');
+        
+        studentAvatar.src = order.student_image || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + order.student_email;
+        studentName.textContent = order.student_name || 'Unknown Student';
+        studentEmail.textContent = order.student_email || '';
+
+        document.getElementById('displayOrderId').textContent = orderId;
+
+        // Display items with addons info
+        // Display items with addons info
+const itemsList = document.getElementById('orderItemsList');
+if (order.items && order.items.length > 0) {
+  itemsList.innerHTML = order.items.map(item => {
+    let addonsText = '';
+    
+    // ✅ FIXED: Check if addons exist and parse if needed
+    let addons = null;
+    if (item.addons) {
+      addons = typeof item.addons === 'string' ? JSON.parse(item.addons) : item.addons;
+    }
+
+    // Check if this is a default meal with addons
+    if (addons) {
+      const addonParts = [];
+      if (addons.egg) addonParts.push('+ Egg');
+      if (addons.chicken) addonParts.push('+ Chicken');
+      if (addonParts.length > 0) {
+        addonsText = `<div style="font-size: 12px; color: #f39c12; margin-top: 5px;">${addonParts.join(', ')}</div>`;
+      }
+    }
+
+    return `
+      <div class="order-item">
+        <div>
+          <div class="order-item-name">
+            ${item.item_name}
+            ${item.is_default_meal ? '<span style="font-size:11px;color:#3498db;"> (Default Meal)</span>' : ''}
+          </div>
+          <div class="order-item-qty">Quantity: ${item.quantity} × ₹${item.price}</div>
+          ${addonsText}
+        </div>
+        <div style="font-weight: 700; font-size: 18px; color: var(--accent);">
+          ₹${(item.quantity * item.price).toFixed(2)}
+        </div>
+      </div>
+    `;
+  }).join('');
+} else {
+          itemsList.innerHTML = '<div style="color: #bdc3c7; text-align: center; padding: 20px;">No items found</div>';
+        }
+
+        document.getElementById('orderTotalAmount').textContent = `₹${order.total_amount}`;
+        document.getElementById('orderDetailsContainer').classList.add('active');
+        document.getElementById('scannerStatus').textContent = '✅ Order Loaded - Press SPACEBAR to complete';
+        document.getElementById('manualOrderId').value = '';
+
+      } catch (error) {
+        console.error('Error fetching order:', error);
+        alert('Error loading order: ' + error.message);
+        document.getElementById('scannerStatus').textContent = '❌ Error: ' + error.message;
+      }
+    }
+
+    // ========== LOGOUT ==========
+    function logout() {
+      localStorage.removeItem('vendor_token');
+      if (html5QrCode) {
+        html5QrCode.stop().catch(err => console.log('Scanner already stopped'));
+      }
+      document.getElementById('mainDashboard').classList.add('hidden');
+      document.getElementById('authScreen').classList.remove('hidden');
+      token = null;
+    }
+
+    // ========== ANALYTICS FUNCTIONS ==========
+    function changePeriod(period) {
+      currentPeriod = period;
+      document.querySelectorAll('.period-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelector(`[data-period="${period}"]`).classList.add('active');
+      loadAnalytics(period);
+    }
+
+    async function loadAnalytics(period) {
+      try {
+        await Promise.all([
+          loadSalesMetrics(period),
+          loadDailyTrend(),
+          loadTopItems(period),
+          loadCategoryPerformance(period),
+          loadPeakHours(),
+          loadRecommendations(),
+          loadRevenueComparison()
+        ]);
+      } catch (error) {
+        console.error('Error loading analytics:', error);
+      }
+    }
+
+    async function loadSalesMetrics(period) {
+      try {
+        const response = await fetch(`${API_URL}/vendor/analytics/sales?period=${period}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await response.json();
+        document.getElementById('totalRevenue').textContent = `₹${data.total_revenue.toFixed(2)}`;
+        document.getElementById('totalOrders').textContent = data.total_orders;
+        document.getElementById('avgOrderValue').textContent = `₹${data.average_order_value.toFixed(2)}`;
+        document.getElementById('uniqueCustomers').textContent = data.unique_customers;
+      } catch (error) {
+        console.error('Error loading metrics:', error);
+      }
+    }
+
+    async function loadRevenueComparison() {
+      try {
+        const response = await fetch(`${API_URL}/vendor/analytics/revenue-comparison`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await response.json();
+        const weekChange = document.getElementById('revenueChange');
+        if (data.week_change > 0) {
+          weekChange.textContent = `↑ ${data.week_change}%`;
+          weekChange.className = 'metric-change positive';
+        } else if (data.week_change < 0) {
+          weekChange.textContent = `↓ ${Math.abs(data.week_change)}%`;
+          weekChange.className = 'metric-change negative';
+        } else {
+          weekChange.textContent = '— 0%';
+          weekChange.className = 'metric-change neutral';
+        }
+      } catch (error) {
+        console.error('Error loading comparison:', error);
+      }
+    }
+
+    async function loadDailyTrend() {
+      try {
+        const response = await fetch(`${API_URL}/vendor/analytics/daily-trend?days=7`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await response.json();
+        const labels = data.map(d => new Date(d.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+        const revenue = data.map(d => d.revenue);
+        const orders = data.map(d => d.orders);
+        
+        if (salesTrendChart) salesTrendChart.destroy();
+        
+        const ctx = document.getElementById('salesTrendChart').getContext('2d');
+        salesTrendChart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: labels,
+            datasets: [{
+              label: 'Revenue (₹)',
+              data: revenue,
+              borderColor: '#e74c3c',
+              backgroundColor: 'rgba(231,76,60,0.1)',
+              tension: 0.4,
+              fill: true
+            }, {
+              label: 'Orders',
+              data: orders,
+              borderColor: '#f39c12',
+              backgroundColor: 'rgba(243,156,18,0.1)',
+              tension: 0.4,
+              fill: true,
+              yAxisID: 'y1'
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: { legend: { labels: { color: 'white' } } },
+            scales: {
+              y: { type: 'linear', position: 'left', ticks: { color: 'white' }, grid: { color: 'rgba(255,255,255,0.1)' } },
+              y1: { type: 'linear', position: 'right', ticks: { color: 'white' }, grid: { display: false } },
+              x: { ticks: { color: 'white' }, grid: { color: 'rgba(255,255,255,0.1)' } }
+            }
+          }
+        });
+      } catch (error) {
+        console.error('Error loading trend:', error);
+      }
+    }
+
+    async function loadTopItems(period) {
+      try {
+        const response = await fetch(`${API_URL}/vendor/analytics/top-items?limit=10&period=${period}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const items = await response.json();
+        const container = document.getElementById('topItemsList');
+        
+        if (items.length === 0) {
+          container.innerHTML = '<div class="loading">No sales data available</div>';
+          return;
+        }
+        
+        container.innerHTML = items.map((item, index) => `
+          <div class="top-item">
+            <div class="top-item-rank">#${index + 1}</div>
+            <div class="top-item-info">
+              <div class="top-item-name">${item.item_name}</div>
+              <div class="top-item-stats">${item.total_sold} units sold · ${item.order_count} orders</div>
+            </div>
+            <div class="top-item-revenue">₹${item.total_revenue.toFixed(2)}</div>
+          </div>
+        `).join('');
+      } catch (error) {
+        console.error('Error loading top items:', error);
+      }
+    }
+
+    async function loadCategoryPerformance(period) {
+      try {
+        const response = await fetch(`${API_URL}/vendor/analytics/categories?period=${period}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await response.json();
+        const labels = data.map(d => d.category);
+        const revenue = data.map(d => d.total_revenue);
+        
+        if (categoryChart) categoryChart.destroy();
+        
+        const ctx = document.getElementById('categoryChart').getContext('2d');
+        categoryChart = new Chart(ctx, {
+          type: 'doughnut',
+          data: {
+            labels: labels,
+            datasets: [{ 
+              data: revenue, 
+              backgroundColor: ['#e74c3c', '#f39c12', '#27ae60', '#3498db', '#9b59b6'] 
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: { legend: { position: 'bottom', labels: { color: 'white' } } }
+          }
+        });
+      } catch (error) {
+        console.error('Error loading categories:', error);
+      }
+    }
+
+    async function loadPeakHours() {
+      try {
+        const response = await fetch(`${API_URL}/vendor/analytics/peak-hours`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await response.json();
+        const hours = Array.from({ length: 24 }, (_, i) => i);
+        const hoursData = hours.map(h => {
+          const found = data.find(d => d.hour === h);
+          return found ? found.order_count : 0;
+        });
+        
+        if (peakHoursChart) peakHoursChart.destroy();
+        
+        const ctx = document.getElementById('peakHoursChart').getContext('2d');
+        peakHoursChart = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: hours.map(h => `${h}:00`),
+            datasets: [{ label: 'Orders', data: hoursData, backgroundColor: '#f39c12' }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: { legend: { labels: { color: 'white' } } },
+            scales: {
+              y: { ticks: { color: 'white' }, grid: { color: 'rgba(255,255,255,0.1)' } },
+              x: { ticks: { color: 'white' }, grid: { color: 'rgba(255,255,255,0.1)' } }
+            }
+          }
+        });
+      } catch (error) {
+        console.error('Error loading peak hours:', error);
+      }
+    }
+
+    async function loadRecommendations() {
+      try {
+        const response = await fetch(`${API_URL}/vendor/analytics/recommendations`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const recommendations = await response.json();
+        const container = document.getElementById('recommendationsList');
+        
+        if (recommendations.length === 0) {
+          container.innerHTML = '<div class="loading">No recommendations available</div>';
+          return;
+        }
+        
+        container.innerHTML = recommendations.map(rec => `
+          <div class="recommendation-card ${rec.status}">
+            <div class="recommendation-header">
+              <div class="recommendation-item-name">${rec.name}</div>
+              <div class="recommendation-status ${rec.status}">${rec.status}</div>
+            </div>
+            <div class="recommendation-stats">
+              <div class="recommendation-stat">
+                <div class="recommendation-stat-label">Current Stock</div>
+                <div class="recommendation-stat-value">${rec.current_stock}</div>
+              </div>
+              <div class="recommendation-stat">
+                <div class="recommendation-stat-label">Sold (7 days)</div>
+                <div class="recommendation-stat-value">${rec.sold_last_7_days}</div>
+              </div>
+              <div class="recommendation-stat">
+                <div class="recommendation-stat-label">Daily Avg</div>
+                <div class="recommendation-stat-value">${rec.daily_average}</div>
+              </div>
+              <div class="recommendation-stat">
+                <div class="recommendation-stat-label">Days Left</div>
+                <div class="recommendation-stat-value">${rec.days_until_stockout}</div>
+              </div>
+            </div>
+            <div class="recommendation-action">💡 ${rec.action}</div>
+          </div>
+        `).join('');
+      } catch (error) {
+        console.error('Error loading recommendations:', error);
+      }
+    }
+
+    // ========== FEEDBACK FUNCTIONS ==========
+    async function loadFeedback() {
+      try {
+        const response = await fetch(`${API_URL}/vendor/feedback`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to load feedback');
+        }
+
+        allFeedback = await response.json();
+        displayFeedbackStats();
+        displayFeedback(currentFeedbackFilter);
+      } catch (error) {
+        console.error('Error loading feedback:', error);
+        document.getElementById('feedbackList').innerHTML = `
+          <div class="no-feedback-message">
+            <span class="emoji">⚠️</span>
+            <p>Failed to load feedback. Please try again.</p>
+          </div>
+        `;
+      }
+    }
+
+    function displayFeedbackStats() {
+      const totalFeedback = allFeedback.length;
+      
+      const avgRating = totalFeedback > 0 
+        ? (allFeedback.reduce((sum, f) => sum + f.rating, 0) / totalFeedback).toFixed(1)
+        : 0;
+
+      const weekAgo = new Date();
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      const recentFeedback = allFeedback.filter(f => new Date(f.created_at) >= weekAgo).length;
+
+      document.getElementById('avgRating').textContent = avgRating;
+      document.getElementById('totalFeedback').textContent = totalFeedback;
+      document.getElementById('recentFeedback').textContent = recentFeedback;
+    }
+
+    function displayFeedback(filter = 'all') {
+      const container = document.getElementById('feedbackList');
+      
+      let filteredFeedback = allFeedback;
+      if (filter !== 'all') {
+        filteredFeedback = allFeedback.filter(f => f.rating === parseInt(filter));
+      }
+
+      if (filteredFeedback.length === 0) {
+        container.innerHTML = `
+          <div class="no-feedback-message">
+            <span class="emoji">📭</span>
+            <p>No feedback found${filter !== 'all' ? ' for this rating' : ''}.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filteredFeedback.map(feedback => {
+        const initials = feedback.user_name
+          .split(' ')
+          .map(n => n[0])
+          .join('')
+          .toUpperCase();
+
+        const stars = Array.from({ length: 5 }, (_, i) => 
+          `<span class="${i < feedback.rating ? '' : 'empty'}">★</span>`
+        ).join('');
+
+        const categoryBadges = {
+          'food_quality': '🍔 Food Quality',
+          'service': '⚡ Service',
+          'app_experience': '📱 App Experience',
+          'pricing': '💰 Pricing',
+          'other': '📝 Other'
+        };
+
+        return `
+          <div class="feedback-card">
+            <div class="feedback-header">
+              <div class="feedback-user-info">
+                <div class="feedback-avatar">${initials}</div>
+                <div class="feedback-user-details">
+                  <h4>${feedback.user_name}</h4>
+                  <p>${feedback.user_email}</p>
+                </div>
+              </div>
+              <div class="feedback-rating">
+                <div class="star-display">${stars}</div>
+                <div class="rating-number">${feedback.rating}/5</div>
+              </div>
+            </div>
+
+            <div class="feedback-category-badge">
+              ${categoryBadges[feedback.category] || feedback.category}
+            </div>
+
+            <div class="feedback-message">
+              ${feedback.message}
+            </div>
+
+            <div class="feedback-footer">
+              <div class="feedback-date">
+                ${new Date(feedback.created_at).toLocaleDateString('en-US', { 
+                  year: 'numeric', 
+                  month: 'long', 
+                  day: 'numeric' 
+                })}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function filterFeedback(filter) {
+      currentFeedbackFilter = filter;
+      
+      document.querySelectorAll('.feedback-filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      document.querySelector(`[data-filter="${filter}"]`).classList.add('active');
+      
+      displayFeedback(filter);
+    }
+  </script>
+</body>
+</html>

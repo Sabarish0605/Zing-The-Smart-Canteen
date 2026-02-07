@@ -1,0 +1,3 @@
+@echo off
+echo Opening Student App...
+start student-app\index.html

@@ -1,0 +1,2746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campus Canteen - Student Portal</title>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+            min-height: 100vh;
+        }
+
+        /* Login Container */
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .login-box {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            max-width: 400px;
+            width: 100%;
+        }
+
+        .login-box h2 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #ff6b35;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+        }
+
+        .toggle-form {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+        }
+
+        .toggle-form a {
+            color: #ff6b35;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .error-message {
+            background: #fee;
+            color: #c33;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .success-message {
+            background: #efe;
+            color: #3c3;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        /* Main App Container */
+        .app-container {
+            display: none;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Enhanced Header with Orange Theme & Noodles Emoji */
+        .app-header {
+            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(255, 107, 53, 0.3);
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+        }
+
+        .app-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 300px;
+            height: 300px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+        }
+
+        .app-header::after {
+            content: '';
+            position: absolute;
+            bottom: -30%;
+            left: -5%;
+            width: 200px;
+            height: 200px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 50%;
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .header-content h1 {
+            color: white;
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .noodles-emoji {
+            font-size: 38px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* ✅ FIXED: Add-on Selection Styles - Radio Button Style */
+        .addon-section {
+            margin-top: 12px;
+            padding: 12px;
+            background: #fff9f0;
+            border-radius: 10px;
+            border: 1px dashed #ff6b35;
+        }
+
+        .addon-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .addon-options {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        /* ✅ CHANGED: Using radio buttons instead of checkboxes */
+        .addon-radio-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 13px;
+        }
+
+        .addon-radio-label:hover {
+            border-color: #ff6b35;
+            background: #fff3e6;
+        }
+
+        .addon-radio-label input[type="radio"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+
+        .addon-radio-label.checked {
+            background: #fff3e6;
+            border-color: #ff6b35;
+            font-weight: 600;
+        }
+
+        .addon-price-tag {
+            color: #ff6b35;
+            font-weight: 700;
+        }
+
+        .base-included-note {
+            margin-top: 8px;
+            font-size: 11px;
+            color: #27ae60;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .header-content p {
+            color: rgba(255, 255, 255, 0.95);
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            position: relative;
+            z-index: 10000;
+        }
+
+        .user-avatar {
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ff6b35;
+            font-weight: bold;
+            font-size: 22px;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .user-avatar:hover {
+            transform: scale(1.08);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .user-dropdown {
+            position: absolute;
+            top: 70px;
+            right: 0;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            min-width: 280px;
+            display: none;
+            z-index: 10001;
+            overflow: hidden;
+        }
+
+        .user-dropdown.active {
+            display: block;
+        }
+
+        .dropdown-header {
+            padding: 12px 20px;
+            background: #f8f8f8;
+            color: #666;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .dropdown-item {
+            padding: 14px 20px;
+            cursor: pointer;
+            transition: background 0.2s;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-item:hover {
+            background: #fff3e6;
+        }
+
+        .dropdown-item i {
+            margin-right: 10px;
+            width: 20px;
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background: #e0e0e0;
+            margin: 0;
+        }
+
+        /* Combined Search and Category Section */
+        .search-and-filter-section {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .search-container {
+            position: relative;
+            max-width: 100%;
+            margin-bottom: 15px;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 15px 50px 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 50px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: #ff6b35;
+            box-shadow: 0 5px 20px rgba(255, 107, 53, 0.2);
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 20px;
+            color: #ff6b35;
+        }
+
+        /* Category filters in same section as search */
+        .category-filters {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .category-filter-btn {
+            padding: 10px 20px;
+            border: 2px solid #e0e0e0;
+            background: white;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .category-filter-btn:hover {
+            border-color: #ff6b35;
+            color: #ff6b35;
+            transform: translateY(-2px);
+        }
+
+        .category-filter-btn.active {
+            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+            color: white;
+            border-color: #ff6b35;
+        }
+
+        /* Navigation Tabs */
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            background: white;
+            padding: 10px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow-x: auto;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            background: transparent;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+            color: white;
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Menu Grid */
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .menu-item {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+            position: relative;
+            z-index: 1;
+        }
+
+        .menu-item:hover {
+            transform: translateY(-5px);
+            z-index: 2;
+        }
+
+        .item-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .item-details {
+            padding: 15px;
+        }
+
+        .item-name {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .item-category {
+            display: inline-block;
+            padding: 4px 12px;
+            background: #fff3e6;
+            color: #ff6b35;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        /* Stock badge styling */
+        .item-stock {
+            display: inline-block;
+            padding: 4px 10px;
+            background: #e8f5e9;
+            color: #2e7d32;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .item-stock.low {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+
+        .item-stock.out {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        /* Instant meal badge */
+        .instant-meal-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            background: #e3f2fd;
+            color: #1976d2;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .item-price {
+            color: #ff6b35;
+            font-size: 20px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .item-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        /* Quantity starts at 0, hidden by default */
+        .quantity-control {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            background: #f0f0f0;
+            border-radius: 8px;
+            padding: 5px;
+        }
+
+        .quantity-control.active {
+            display: flex;
+        }
+
+        .quantity-btn {
+            width: 30px;
+            height: 30px;
+            border: none;
+            background: #ff6b35;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .add-to-cart-btn {
+            flex: 1;
+            padding: 10px;
+            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .add-to-cart-btn.disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* ✅ ENHANCED: Cart Styles */
+        .cart-container {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .cart-item-info {
+            flex: 1;
+        }
+
+        .cart-item-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        /* ✅ ADDED: Cart quantity control styling */
+        .cart-quantity-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #f0f0f0;
+            border-radius: 8px;
+            padding: 5px 10px;
+        }
+
+        .cart-quantity-btn {
+            width: 28px;
+            height: 28px;
+            border: none;
+            background: #ff6b35;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .remove-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .cart-total {
+            padding: 20px;
+            background: #f8f8f8;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .checkout-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+
+        /* Orders */
+        .orders-container {
+            display: grid;
+            gap: 20px;
+        }
+
+        .order-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-top: 2px solid #f0f0f0;
+        }
+
+        .order-status {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-preparing {
+            background: #cfe2ff;
+            color: #084298;
+        }
+
+        .status-ready {
+            background: #d1e7dd;
+            color: #0f5132;
+        }
+
+        .status-completed {
+            background: #d3d3d3;
+            color: #383838;
+        }
+
+        .status-active {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .show-qr-btn {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 15px;
+            width: 100%;
+            transition: transform 0.2s;
+        }
+
+        .show-qr-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        /* QR Code Modal */
+        .qr-modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .qr-modal-overlay.active {
+            display: flex;
+        }
+
+        .qr-modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 25px;
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .qr-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .qr-modal-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #ff6b35;
+        }
+
+        .qr-close-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: #f0f0f0;
+            cursor: pointer;
+            font-size: 24px;
+            color: #666;
+            transition: all 0.3s;
+        }
+
+        .qr-close-btn:hover {
+            background: #ff6b35;
+            color: white;
+            transform: rotate(90deg);
+        }
+
+        .qr-modal-body {
+            margin: 30px 0;
+        }
+
+        .qr-code-image {
+            max-width: 300px;
+            width: 100%;
+            height: auto;
+            border: 3px solid #ff6b35;
+            border-radius: 15px;
+            padding: 20px;
+            background: white;
+        }
+
+        .qr-order-info {
+            margin-top: 25px;
+            padding: 20px;
+            background: #fff3e6;
+            border-radius: 12px;
+        }
+
+        .qr-order-id {
+            font-size: 18px;
+            font-weight: 700;
+            color: #ff6b35;
+            margin-bottom: 10px;
+        }
+
+        .qr-instruction {
+            color: #666;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #ff6b35;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            font-weight: 600;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            z-index: 3000;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        /* Star Rating */
+        .star-rating {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .star {
+            font-size: 40px;
+            cursor: pointer;
+            color: #ddd;
+            transition: color 0.2s;
+        }
+
+        .star.active,
+        .star:hover {
+            color: #ffd700;
+        }
+
+        /* Payment History Table */
+        .payment-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .payment-table th,
+        .payment-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .payment-table th {
+            background: #f8f8f8;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .payment-status {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .payment-success {
+            background: #d1e7dd;
+            color: #0f5132;
+        }
+
+        .payment-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .payment-failed {
+            background: #f8d7da;
+            color: #842029;
+        }
+
+        /* Compliance Content */
+        .compliance-content {
+            line-height: 1.8;
+            color: #555;
+        }
+
+        .compliance-content h4 {
+            color: #333;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        .compliance-content ul {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+
+        .compliance-content li {
+            margin-bottom: 8px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .menu-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .app-header {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .nav-tabs {
+                flex-direction: column;
+            }
+
+            .category-filters {
+                justify-content: flex-start;
+            }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Login/Signup Container -->
+    <div class="login-container" id="authContainer">
+        <div class="login-box">
+            <h2 id="authTitle">Student Login</h2>
+            
+            <div class="error-message" id="authError"></div>
+            <div class="success-message" id="authSuccess"></div>
+
+            <!-- Login Form -->
+            <form id="loginForm">
+                <div class="input-group">
+                    <label>Email</label>
+                    <input type="email" id="loginEmail" required>
+                </div>
+                <div class="input-group">
+                    <label>Password</label>
+                    <input type="password" id="loginPassword" required>
+                </div>
+                <button type="submit" class="btn-primary">Login</button>
+            </form>
+
+            <!-- Signup Form -->
+            <form id="signupForm" style="display: none;">
+                <div class="input-group">
+                    <label>Full Name</label>
+                    <input type="text" id="signupName" required>
+                </div>
+                <div class="input-group">
+                    <label>Email</label>
+                    <input type="email" id="signupEmail" required>
+                </div>
+                <div class="input-group">
+                    <label>Phone</label>
+                    <input type="tel" id="signupPhone" required>
+                </div>
+                <div class="input-group">
+                    <label>Password</label>
+                    <input type="password" id="signupPassword" required>
+                </div>
+                <button type="submit" class="btn-primary">Sign Up</button>
+            </form>
+
+            <div class="toggle-form">
+                <span id="toggleText">Don't have an account? </span>
+                <a href="#" id="toggleBtn">Sign Up</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App Container -->
+    <div class="app-container" id="appContainer">
+        <!-- Enhanced Header -->
+        <div class="app-header">
+            <div class="header-content">
+                <h1>
+                    <span class="noodles-emoji">🍜🍴</span>
+                    Campus Canteen
+                </h1>
+                <p>Welcome, <span id="userName"></span>!</p>
+            </div>
+            <div class="user-info">
+                <div class="user-avatar" id="userAvatar" onclick="toggleUserDropdown()">
+                    <span id="userInitials"></span>
+                </div>
+                <div class="user-dropdown" id="userDropdown">
+                    <div class="dropdown-header">
+                        <span style="font-weight: 600;">Account</span>
+                    </div>
+                    <div class="dropdown-item" onclick="showEditProfile()">
+                        <span>✏️</span> Edit Profile
+                    </div>
+                    <div class="dropdown-item" onclick="showChangePassword()">
+                        <span>🔒</span> Change Password
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <div class="dropdown-header">
+                        <span style="font-weight: 600;">Payment</span>
+                    </div>
+                    <div class="dropdown-item" onclick="showPaymentHistory()">
+                        <span>💳</span> Payment History
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <div class="dropdown-header">
+                        <span style="font-weight: 600;">Support</span>
+                    </div>
+                    <div class="dropdown-item" onclick="showFeedback()">
+                        <span>💬</span> Send Feedback
+                    </div>
+                    <div class="dropdown-item" onclick="showCompliance()">
+                        <span>📋</span> Terms & Privacy
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <div class="dropdown-item" onclick="logout()">
+                        <span>🚪</span> Logout
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Combined Search and Filter Section -->
+        <div class="search-and-filter-section">
+            <div class="search-container">
+                <input type="text" class="search-box" id="menuSearch" placeholder="🔍 Search for your favorite food..." onkeyup="searchMenu(this.value)">
+                <span class="search-icon">🔍</span>
+            </div>
+
+            <div class="category-filters" id="categoryFilters">
+                <button class="category-filter-btn active" onclick="filterByCategory('all')">All Items</button>
+                <button class="category-filter-btn" onclick="filterByCategory('Snacks')">🍿 Snacks</button>
+                <button class="category-filter-btn" onclick="filterByCategory('Meals')">🍛 Meals</button>
+                <button class="category-filter-btn" onclick="filterByCategory('Beverages')">🥤 Beverages</button>
+                <button class="category-filter-btn" onclick="filterByCategory('Desserts')">🍰 Desserts</button>
+                <button class="category-filter-btn" onclick="filterByCategory('Stationery')">📝 Stationery</button>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="nav-tabs">
+            <button class="tab-btn active" onclick="switchTab(event,'menu')">🍕 Menu</button>
+            <button class="tab-btn" onclick="switchTab(event,'cart')">
+                🛒 Cart (<span id="cartCount">0</span>)
+            </button>
+            <button class="tab-btn" onclick="switchTab(event,'active')">📋 Active Orders</button>
+            <button class="tab-btn" onclick="switchTab(event,'completed')">✅ Completed</button>
+        </div>
+
+        <!-- Menu Tab -->
+        <div class="tab-content active" id="menuTab">
+            <div class="menu-grid" id="menuGrid">
+                <!-- Menu items will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Cart Tab -->
+        <div class="tab-content" id="cartTab">
+            <div class="cart-container">
+                <h2>Your Cart</h2>
+                <div id="cartItems">
+                    <p style="text-align: center; color: #999; padding: 50px;">Your cart is empty</p>
+                </div>
+                <div class="cart-total" id="cartTotal" style="display: none;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <span>Subtotal:</span>
+                        <span>₹<span id="subtotal">0</span></span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 20px; font-weight: bold;">
+                        <span>Total:</span>
+                        <span>₹<span id="total">0</span></span>
+                    </div>
+                    <button class="checkout-btn" onclick="checkout()">Proceed to Checkout</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active Orders Tab -->
+        <div class="tab-content" id="activeTab">
+            <div class="orders-container" id="activeOrders">
+                <p style="text-align: center; color: #999; padding: 50px;">No active orders</p>
+            </div>
+        </div>
+
+        <!-- Completed Orders Tab -->
+        <div class="tab-content" id="completedTab">
+            <div class="orders-container" id="completedOrders">
+                <p style="text-align: center; color: #999; padding: 50px;">No completed orders</p>
+            </div>
+        </div>
+    </div>
+    <!-- QR Modal -->
+    <div class="qr-modal-overlay" id="qrModalOverlay" onclick="closeQRModal(event)">
+        <div class="qr-modal-content" onclick="event.stopPropagation()">
+            <div class="qr-modal-header">
+                <h2 class="qr-modal-title">🎫 Your Order QR Code</h2>
+                <button class="qr-close-btn" onclick="closeQRModal()">&times;</button>
+            </div>
+            
+            <div class="qr-modal-body">
+                <img id="qrCodeImage" class="qr-code-image" src="" alt="Order QR Code">
+                
+                <div class="qr-order-info">
+                    <div class="qr-order-id" id="qrOrderId">Order #ORD_123456</div>
+                    <div class="qr-instruction">
+                        📱 Show this QR code to the vendor to collect your order
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Profile Modal -->
+    <div class="modal" id="editProfileModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>✏️ Edit Profile</h3>
+                <button class="close-modal" onclick="closeModal('editProfileModal')">&times;</button>
+            </div>
+            <div class="error-message" id="editProfileError"></div>
+            <div class="success-message" id="editProfileSuccess"></div>
+            <form id="editProfileForm">
+                <div class="input-group">
+                    <label>Full Name</label>
+                    <input type="text" id="editName" required>
+                </div>
+                <div class="input-group">
+                    <label>Profile Picture URL (optional)</label>
+                    <input type="url" id="editPicture" placeholder="https://example.com/photo.jpg">
+                </div>
+                <button type="submit" class="btn-primary">Save Changes</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div class="modal" id="changePasswordModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>🔒 Change Password</h3>
+                <button class="close-modal" onclick="closeModal('changePasswordModal')">&times;</button>
+            </div>
+            <div class="error-message" id="changePasswordError"></div>
+            <div class="success-message" id="changePasswordSuccess"></div>
+            <form id="changePasswordForm">
+                <div class="input-group">
+                    <label>Current Password</label>
+                    <input type="password" id="currentPassword" required>
+                </div>
+                <div class="input-group">
+                    <label>New Password</label>
+                    <input type="password" id="newPassword" required minlength="6">
+                </div>
+                <div class="input-group">
+                    <label>Confirm New Password</label>
+                    <input type="password" id="confirmPassword" required minlength="6">
+                </div>
+                <button type="submit" class="btn-primary">Change Password</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Payment History Modal -->
+    <div class="modal" id="paymentHistoryModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>💳 Payment History</h3>
+                <button class="close-modal" onclick="closeModal('paymentHistoryModal')">&times;</button>
+            </div>
+            <p style="color: #666; margin-bottom: 20px;">Last 7 days transactions</p>
+            <div id="paymentHistoryContent">
+                <p style="text-align: center; color: #999; padding: 30px;">Loading...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Feedback Modal -->
+    <div class="modal" id="feedbackModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>💬 Send Feedback</h3>
+                <button class="close-modal" onclick="closeModal('feedbackModal')">&times;</button>
+            </div>
+            <div class="error-message" id="feedbackError"></div>
+            <div class="success-message" id="feedbackSuccess"></div>
+            <form id="feedbackForm">
+                <div class="input-group">
+                    <label>Rate Your Experience</label>
+                    <div class="star-rating" id="starRating">
+                        <span class="star" data-rating="1">★</span>
+                        <span class="star" data-rating="2">★</span>
+                        <span class="star" data-rating="3">★</span>
+                        <span class="star" data-rating="4">★</span>
+                        <span class="star" data-rating="5">★</span>
+                    </div>
+                    <input type="hidden" id="feedbackRating" value="0" required>
+                </div>
+                <div class="input-group">
+                    <label>Category</label>
+                    <select id="feedbackCategory" required style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px;">
+                        <option value="">Select a category</option>
+                        <option value="food_quality">Food Quality</option>
+                        <option value="service">Service</option>
+                        <option value="app_experience">App Experience</option>
+                        <option value="pricing">Pricing</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Your Feedback</label>
+                    <textarea id="feedbackMessage" required style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; min-height: 120px; font-family: inherit;"></textarea>
+                </div>
+                <button type="submit" class="btn-primary">Submit Feedback</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Compliance Modal -->
+    <div class="modal" id="complianceModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>📋 Compliance & Privacy</h3>
+                <button class="close-modal" onclick="closeModal('complianceModal')">&times;</button>
+            </div>
+            <div class="compliance-content">
+                <h4>📜 Terms of Service</h4>
+                <p>By using the Campus Canteen app, you agree to:</p>
+                <ul>
+                    <li>Provide accurate account information</li>
+                    <li>Use the service for legitimate food orders only</li>
+                    <li>Respect the canteen staff and fellow students</li>
+                    <li>Pay for all orders placed through your account</li>
+                    <li>Not share your account credentials with others</li>
+                </ul>
+
+                <h4>🔒 Privacy Policy</h4>
+                <p>We collect and use your information to:</p>
+                <ul>
+                    <li>Process your food orders and payments</li>
+                    <li>Communicate order status updates</li>
+                    <li>Improve our service based on feedback</li>
+                    <li>Maintain account security</li>
+                </ul>
+                <p>We do not sell your personal information to third parties. Payment processing is handled securely by Razorpay.</p>
+
+                <h4>💰 Refund Policy</h4>
+                <p>Refunds are provided in the following cases:</p>
+                <ul>
+                    <li>Order cancelled before preparation begins</li>
+                    <li>Food quality issues (case-by-case basis)</li>
+                    <li>System errors resulting in duplicate charges</li>
+                </ul>
+                <p>Refunds are processed within 5-7 business days to your original payment method.</p>
+
+                <h4>📞 Contact Information</h4>
+                <p>For support, feedback, or complaints:</p>
+                <ul>
+                    <li>Email: support@campuscanteen.edu</li>
+                    <li>Phone: +91 1234567890</li>
+                    <li>Visit: Main Campus Canteen, Ground Floor</li>
+                </ul>
+
+                <p style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e0e0e0; color: #999; font-size: 12px;">
+                    Last updated: February 2026<br>
+                    Campus Canteen © 2026. All rights reserved.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const API_URL = 'http://localhost:3001/api';
+        const SOCKET_URL = 'http://localhost:3001';
+
+        // Global Variables
+        let currentUser = null;
+        let authToken = null;
+        let socket = null;
+        let cart = [];
+        let menuItems = [];
+        let activeOrders = [];
+        let completedOrders = [];
+        let currentCategory = 'all';
+
+        // Initialize App
+        document.addEventListener('DOMContentLoaded', () => {
+            checkAuth();
+            setupEventListeners();
+        });
+
+        // Check Authentication
+        function checkAuth() {
+            const token = localStorage.getItem('authToken');
+            const user = localStorage.getItem('currentUser');
+            
+            if (token && user) {
+                authToken = token;
+                currentUser = JSON.parse(user);
+                showApp();
+            }
+        }
+
+        // Setup Event Listeners
+        function setupEventListeners() {
+            // Login Form
+            document.getElementById('loginForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const email = document.getElementById('loginEmail').value;
+                const password = document.getElementById('loginPassword').value;
+                await login(email, password);
+            });
+
+            // Signup Form
+            document.getElementById('signupForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const name = document.getElementById('signupName').value;
+                const email = document.getElementById('signupEmail').value;
+                const phone = document.getElementById('signupPhone').value;
+                const password = document.getElementById('signupPassword').value;
+                await signup(name, email, phone, password);
+            });
+
+            // Toggle Form
+            document.getElementById('toggleBtn').addEventListener('click', (e) => {
+                e.preventDefault();
+                toggleAuthForm();
+            });
+
+            // Star Rating
+            document.querySelectorAll('.star').forEach(star => {
+                star.addEventListener('click', function() {
+                    const rating = this.getAttribute('data-rating');
+                    setRating(rating);
+                });
+            });
+
+            // Edit Profile Form
+            document.getElementById('editProfileForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await updateProfile();
+            });
+
+            // Change Password Form
+            document.getElementById('changePasswordForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await changePassword();
+            });
+
+            // Feedback Form
+            document.getElementById('feedbackForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await submitFeedback();
+            });
+
+            // Close modal on background click
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        modal.classList.remove('active');
+                    }
+                });
+            });
+        }
+
+        // Login Function
+        async function login(email, password) {
+            try {
+                const response = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (data.token && data.user) {
+                    authToken = data.token;
+                    currentUser = data.user;
+                    currentUser.balance = currentUser.balance ?? 0;
+                    currentUser.picture = currentUser.picture ?? null;
+
+                    localStorage.setItem('authToken', authToken);
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+
+                    showApp();
+                } else {
+                    showError('authError', data.error || 'Invalid login response');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                showError('authError', 'Failed to connect to server');
+            }
+        }
+
+        // Signup Function
+        async function signup(name, email, phone, password) {
+            try {
+                const response = await fetch(`${API_URL}/auth/signup`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name, email, phone, password })
+                });
+
+                const data = await response.json();
+
+                if (data.token && data.user) {
+                    showSuccess('authSuccess', 'Account created successfully!');
+
+                    setTimeout(() => {
+                        authToken = data.token;
+                        currentUser = data.user;
+                        currentUser.balance = currentUser.balance ?? 0;
+                        currentUser.picture = currentUser.picture ?? null;
+
+                        localStorage.setItem('authToken', authToken);
+                        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+
+                        showApp();
+                    }, 1500);
+                } else {
+                    showError('authError', data.error || 'Signup failed');
+                }
+
+            } catch (error) {
+                console.error('Signup error:', error);
+                showError('authError', 'Failed to connect to server');
+            }
+        }
+
+        // Toggle Login / Signup
+        function toggleAuthForm() {
+            const loginForm = document.getElementById('loginForm');
+            const signupForm = document.getElementById('signupForm');
+            const title = document.getElementById('authTitle');
+            const toggleText = document.getElementById('toggleText');
+            const toggleBtn = document.getElementById('toggleBtn');
+
+            if (loginForm.style.display === 'none') {
+                loginForm.style.display = 'block';
+                signupForm.style.display = 'none';
+                title.textContent = 'Student Login';
+                toggleText.textContent = "Don't have an account? ";
+                toggleBtn.textContent = 'Sign Up';
+            } else {
+                loginForm.style.display = 'none';
+                signupForm.style.display = 'block';
+                title.textContent = 'Student Signup';
+                toggleText.textContent = "Already have an account? ";
+                toggleBtn.textContent = 'Login';
+            }
+
+            document.getElementById('authError').style.display = 'none';
+            document.getElementById('authSuccess').style.display = 'none';
+        }
+
+        // Show App
+        function showApp() {
+            document.getElementById('authContainer').style.display = 'none';
+            document.getElementById('appContainer').style.display = 'block';
+
+            document.getElementById('userName').textContent = currentUser.name;
+            
+            const avatarContainer = document.getElementById('userAvatar');
+            if (currentUser.picture) {
+                avatarContainer.innerHTML = `<img src="${currentUser.picture}" alt="Profile">`;
+            } else {
+                const initials = currentUser.name
+                    .split(' ')
+                    .map(n => n[0])
+                    .join('')
+                    .toUpperCase();
+                document.getElementById('userInitials').textContent = initials;
+            }
+
+            loadMenu();
+            connectSocket();
+            loadOrders();
+        }
+
+        // Connect Socket
+        function connectSocket() {
+            socket = io(SOCKET_URL, {
+                auth: { token: authToken }
+            });
+
+            socket.on('connect', () => {
+                console.log('Connected to server');
+            });
+
+            socket.on('orderUpdate', (order) => {
+                updateOrderStatus(order);
+            });
+
+            socket.on('order-completed', (data) => {
+                console.log('Order completed:', data.orderId);
+                
+                activeOrders = activeOrders.filter(o => o.order_id !== data.orderId);
+                loadOrders();
+                
+                const qrOrderId = document.getElementById('qrOrderId').textContent.replace('Order #', '');
+                if (qrOrderId === data.orderId) {
+                    closeQRModal();
+                }
+                
+                showToast('Order completed! ✅');
+            });
+
+            // Listen for stock updates
+            socket.on('stock-updated', () => {
+                console.log('Stock updated - reloading menu');
+                loadMenu();
+            });
+        }
+
+        // Load Menu
+        async function loadMenu() {
+            try {
+                // Get raw materials first
+                const rawResponse = await fetch(`${API_URL}/raw-materials`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                const rawMaterials = await rawResponse.json();
+
+                // Calculate default meal availability
+                const vegRiceStock = Math.min(rawMaterials.rice || 0, rawMaterials.veg || 0);
+                const vegNoodlesStock = Math.min(rawMaterials.noodles || 0, rawMaterials.veg || 0);
+
+                // Create default meals array
+                const defaultMeals = [
+                    {
+                        item_id: 'default-veg-fried-rice',
+                        id: 'default-veg-fried-rice',
+                        name: 'Veg Fried Rice',
+                        description: 'Rice with vegetables (Veg included)',
+                        price: 50,
+                        image_url: 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=400',
+                        stock: vegRiceStock,
+                        category: 'Meals',
+                        isAvailable: vegRiceStock > 0,
+                        is_default_meal: true,
+                        base_price: 50,
+                        base_ingredients: { rice: 1, veg: 1 }
+                    },
+                    {
+                        item_id: 'default-veg-fried-noodles',
+                        id: 'default-veg-fried-noodles',
+                        name: 'Veg Fried Noodles',
+                        description: 'Noodles with vegetables (Veg included)',
+                        price: 55,
+                        image_url: 'https://images.unsplash.com/photo-1585032226651-759b368d7246?w=400',
+                        stock: vegNoodlesStock,
+                        category: 'Meals',
+                        isAvailable: vegNoodlesStock > 0,
+                        is_default_meal: true,
+                        base_price: 55,
+                        base_ingredients: { noodles: 1, veg: 1 }
+                    }
+                ];
+
+                // Get regular menu items
+                const menuResponse = await fetch(`${API_URL}/menu`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                const regularItems = await menuResponse.json();
+
+                // Combine default meals with regular items
+                menuItems = [...defaultMeals];
+                
+                regularItems.forEach(item => {
+                    if (!item.is_default_meal) {
+                        const itemId = item.item_id || item.id || item._id;
+                        
+                        if (!itemId) {
+                            console.error('❌ Menu item missing ID:', item);
+                        }
+                        
+                        menuItems.push({
+                            item_id: itemId,
+                            id: itemId,
+                            name: item.name || item.item_name,
+                            description: item.description || '',
+                            price: Number(item.price),
+                            image_url: item.image_url || item.image || 'https://via.placeholder.com/300',
+                            stock: item.stock || 0,
+                            category: item.category || 'Uncategorized',
+                            isAvailable: item.isAvailable !== false && item.stock > 0,
+                            is_instant_meal: Boolean(item.is_instant_meal)
+                        });
+                    }
+                });
+
+                console.log('✅ Menu loaded with', menuItems.length, 'items (including 2 default meals)');
+                displayMenu();
+            } catch (error) {
+                console.error('❌ Failed to load menu:', error);
+                alert('Failed to load menu. Please refresh the page.');
+            }
+        }
+        // ✅ FIXED: Display Menu with Radio Buttons for Addons
+        function displayMenu(category = 'all') {
+            const menuGrid = document.getElementById('menuGrid');
+            menuGrid.innerHTML = '';
+
+            let filteredItems = menuItems;
+            if (category !== 'all') {
+                filteredItems = menuItems.filter(item => item.category === category);
+            }
+
+            if (filteredItems.length === 0) {
+                menuGrid.innerHTML = '<p style="text-align: center; color: #999; padding: 50px; grid-column: 1/-1;">No items found in this category</p>';
+                return;
+            }
+
+            filteredItems.forEach((item, globalIndex) => {
+                const itemIndex = menuItems.findIndex(mi => mi.item_id === item.item_id);
+                const cartItem = cart.find(c => c.item_id === item.item_id);
+                const currentQty = cartItem ? cartItem.quantity : 0;
+                const selectedAddon = cartItem?.selectedAddon || 'none';
+                
+                const itemCard = document.createElement('div');
+                itemCard.className = 'menu-item';
+                itemCard.setAttribute('data-category', item.category);
+                itemCard.setAttribute('data-name', item.name.toLowerCase());
+                itemCard.setAttribute('data-item-id', item.item_id);
+                
+                // Stock status
+                let stockBadge = '';
+                let stockClass = '';
+                if (item.stock === 0) {
+                    stockBadge = '<span class="item-stock out">Out of Stock</span>';
+                    stockClass = 'disabled';
+                } else if (item.stock <= 5) {
+                    stockBadge = `<span class="item-stock low">Only ${item.stock} left</span>`;
+                } else {
+                    stockBadge = `<span class="item-stock">Stock: ${item.stock}</span>`;
+                }
+
+                // Instant meal badge
+                let instantMealBadge = '';
+                if (item.is_instant_meal) {
+                    instantMealBadge = '<span class="instant-meal-badge">🔥 Instant Meal</span>';
+                }
+
+                // ✅ FIXED: Build addon UI with RADIO buttons (mutually exclusive)
+                let addonHTML = '';
+                if (item.is_default_meal) {
+                    const radioName = `addon-${itemIndex}`;
+                    addonHTML = `
+                        <div class="addon-section">
+                            <div class="addon-title">🍳 Choose One Extra (Optional)</div>
+                            <div class="addon-options">
+                                <label class="addon-radio-label ${selectedAddon === 'none' ? 'checked' : ''}" id="addon-none-label-${itemIndex}">
+                                    <input type="radio" 
+                                           name="${radioName}" 
+                                           class="addon-radio" 
+                                           id="addon-none-${itemIndex}"
+                                           value="none"
+                                           ${selectedAddon === 'none' ? 'checked' : ''}
+                                           onchange="selectAddon(${itemIndex}, 'none')">
+                                    <span>❌ None</span>
+                                </label>
+                                <label class="addon-radio-label ${selectedAddon === 'egg' ? 'checked' : ''}" id="addon-egg-label-${itemIndex}">
+                                    <input type="radio" 
+                                           name="${radioName}" 
+                                           class="addon-radio" 
+                                           id="addon-egg-${itemIndex}"
+                                           value="egg"
+                                           ${selectedAddon === 'egg' ? 'checked' : ''}
+                                           onchange="selectAddon(${itemIndex}, 'egg')">
+                                    <span>🥚 Egg <span class="addon-price-tag">+₹15</span></span>
+                                </label>
+                                <label class="addon-radio-label ${selectedAddon === 'chicken' ? 'checked' : ''}" id="addon-chicken-label-${itemIndex}">
+                                    <input type="radio" 
+                                           name="${radioName}" 
+                                           class="addon-radio" 
+                                           id="addon-chicken-${itemIndex}"
+                                           value="chicken"
+                                           ${selectedAddon === 'chicken' ? 'checked' : ''}
+                                           onchange="selectAddon(${itemIndex}, 'chicken')">
+                                    <span>🍗 Chicken <span class="addon-price-tag">+₹30</span></span>
+                                </label>
+                            </div>
+                            <div class="base-included-note">✓ ${item.name === 'Veg Fried Rice' ? 'Rice' : 'Noodles'} & Veg included in base price</div>
+                        </div>
+                    `;
+                }
+
+                itemCard.innerHTML = `
+                    <img src="${item.image_url}" alt="${item.name}" class="item-image">
+                    <div class="item-details">
+                        <div class="item-category">${item.category}${stockBadge}${instantMealBadge}</div>
+                        <div class="item-name">${item.name}</div>
+                        <div style="color: #666; font-size: 14px;">${item.description}</div>
+                        <div class="item-price">₹${item.price}${item.is_default_meal ? ' <span style="font-size:12px;color:#999;">(base)</span>' : ''}</div>
+
+                        ${addonHTML}
+
+                        <div class="item-actions">
+                            ${currentQty > 0 ? `
+                                <div class="quantity-control active" id="qty-control-${itemIndex}">
+                                    <button class="quantity-btn" onclick="changeQuantity(${itemIndex}, -1)">-</button>
+                                    <span id="qty-${itemIndex}">${currentQty}</span>
+                                    <button class="quantity-btn" onclick="changeQuantity(${itemIndex}, 1)">+</button>
+                                </div>
+                            ` : ''}
+
+                            <button class="add-to-cart-btn ${stockClass}" 
+                                    onclick="addToCart(${itemIndex})" 
+                                    ${item.stock === 0 ? 'disabled' : ''}
+                                    id="add-btn-${itemIndex}">
+                                ${currentQty > 0 ? 'Update Cart' : 'Add to Cart'}
+                            </button>
+                        </div>
+                    </div>
+                `;
+                menuGrid.appendChild(itemCard);
+            });
+        }
+
+        // ✅ NEW: Select Addon (handles radio button logic)
+        function selectAddon(itemIndex, addonType) {
+            const item = menuItems[itemIndex];
+            if (!item || !item.is_default_meal) return;
+
+            // Update visual state of labels
+            ['none', 'egg', 'chicken'].forEach(type => {
+                const label = document.getElementById(`addon-${type}-label-${itemIndex}`);
+                if (label) {
+                    label.classList.toggle('checked', type === addonType);
+                }
+            });
+
+            // Update cart item if already in cart
+            const cartItem = cart.find(c => c.item_id === item.item_id);
+            if (cartItem) {
+                cartItem.selectedAddon = addonType;
+                updateCart();
+            }
+        }
+
+        // Filter by Category
+        function filterByCategory(category) {
+            currentCategory = category;
+            
+            // Update active button
+            document.querySelectorAll('.category-filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Filter menu
+            displayMenu(category);
+        }
+
+        // Search Menu
+        function searchMenu(query) {
+            query = query.toLowerCase().trim();
+            const menuCards = document.querySelectorAll('.menu-item');
+            
+            menuCards.forEach(card => {
+                const itemName = card.getAttribute('data-name');
+                const category = card.getAttribute('data-category').toLowerCase();
+                
+                if (itemName.includes(query) || category.includes(query)) {
+                    card.style.display = '';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // Change Quantity
+        function changeQuantity(index, delta) {
+            const item = menuItems[index];
+            if (!item) {
+                console.error('❌ Item not found at index:', index);
+                return;
+            }
+
+            const cartItem = cart.find(c => c.item_id === item.item_id);
+            
+            if (cartItem) {
+                const newQty = cartItem.quantity + delta;
+                
+                if (newQty <= 0) {
+                    cart = cart.filter(c => c.item_id !== item.item_id);
+                } else if (newQty <= item.stock) {
+                    cartItem.quantity = newQty;
+                } else {
+                    showToast(`Only ${item.stock} items available in stock`);
+                    return;
+                }
+                
+                updateCart();
+                displayMenu(currentCategory);
+            }
+        }
+
+        // ✅ FIXED: Add to Cart with Addon Support
+        function addToCart(index) {
+            const item = menuItems[index];
+            
+            if (!item) {
+                console.error('❌ Item not found at index:', index);
+                alert('Error: Item not found');
+                return;
+            }
+
+            if (item.stock === 0) {
+                showToast('Item is out of stock');
+                return;
+            }
+
+            const itemId = item.item_id || item.id;
+            
+            if (!itemId) {
+                console.error('❌ Item ID missing for item:', item);
+                alert(`Error: Cannot add ${item.name} to cart - item ID is missing.`);
+                return;
+            }
+
+            const existingItem = cart.find(i => i.item_id === itemId);
+
+            // ✅ Get selected addon for default meals
+            let selectedAddon = 'none';
+            if (item.is_default_meal) {
+                const noneRadio = document.getElementById(`addon-none-${index}`);
+                const eggRadio = document.getElementById(`addon-egg-${index}`);
+                const chickenRadio = document.getElementById(`addon-chicken-${index}`);
+                
+                if (eggRadio?.checked) selectedAddon = 'egg';
+                else if (chickenRadio?.checked) selectedAddon = 'chicken';
+                else selectedAddon = 'none';
+            }
+
+            if (existingItem) {
+                // Update quantity and addon
+                if (existingItem.quantity < item.stock) {
+                    existingItem.quantity += 1;
+                    if (item.is_default_meal) {
+                        existingItem.selectedAddon = selectedAddon;
+                    }
+                    console.log(`✅ Updated quantity for ${item.name}:`, existingItem.quantity);
+                } else {
+                    showToast(`Only ${item.stock} items available in stock`);
+                    return;
+                }
+            } else {
+                // Add new item
+                const cartItem = {
+                    item_id: itemId,
+                    id: itemId,
+                    name: item.name,
+                    price: item.price,
+                    base_price: item.price,
+                    image_url: item.image_url,
+                    quantity: 1,
+                    cartIndex: index,
+                    is_default_meal: item.is_default_meal || false,
+                    base_ingredients: item.base_ingredients || null,
+                    selectedAddon: item.is_default_meal ? selectedAddon : null
+                };
+                
+                cart.push(cartItem);
+                console.log(`✅ Added ${item.name} to cart:`, cartItem);
+            }
+
+            updateCart();
+            displayMenu(currentCategory);
+            showToast(`${item.name} added to cart 🛒`);
+        }
+
+        // ✅ ENHANCED: Update Cart with Quantity Controls and Addon Display
+        function updateCart() {
+            const cartItems = document.getElementById('cartItems');
+            const cartTotal = document.getElementById('cartTotal');
+            const cartCount = document.getElementById('cartCount');
+
+            cartCount.textContent = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+            if (cart.length === 0) {
+                cartItems.innerHTML = '<p style="text-align:center;color:#999;padding:50px;">Your cart is empty</p>';
+                cartTotal.style.display = 'none';
+                return;
+            }
+
+            let subtotal = 0;
+            cartItems.innerHTML = '';
+
+            cart.forEach(item => {
+                // Calculate price with addon
+                let displayPrice = item.base_price || item.price;
+                let addonText = '';
+                
+                if (item.is_default_meal && item.selectedAddon && item.selectedAddon !== 'none') {
+                    if (item.selectedAddon === 'egg') {
+                        displayPrice += 15;
+                        addonText = ' + Egg (₹15)';
+                    } else if (item.selectedAddon === 'chicken') {
+                        displayPrice += 30;
+                        addonText = ' + Chicken (₹30)';
+                    }
+                }
+                
+                const itemTotal = displayPrice * item.quantity;
+                subtotal += itemTotal;
+
+                const cartItem = document.createElement('div');
+                cartItem.className = 'cart-item';
+                cartItem.innerHTML = `
+                    <div class="cart-item-info">
+                        <div style="font-weight:600">${item.name}</div>
+                        ${addonText ? `<div style="color:#ff6b35;font-size:12px;">${addonText}</div>` : ''}
+                        <div style="color:#666">₹${displayPrice} each</div>
+                    </div>
+                    <div class="cart-item-controls">
+                        <div class="cart-quantity-control">
+                            <button class="cart-quantity-btn" onclick="updateCartItemQuantity('${item.item_id}', -1)">-</button>
+                            <span style="font-weight:600;min-width:20px;text-align:center;">${item.quantity}</span>
+                            <button class="cart-quantity-btn" onclick="updateCartItemQuantity('${item.item_id}', 1)">+</button>
+                        </div>
+                        <button class="remove-btn" onclick="removeFromCart('${item.item_id}')">🗑️</button>
+                    </div>
+                `;
+                cartItems.appendChild(cartItem);
+            });
+
+            document.getElementById('subtotal').textContent = subtotal;
+            document.getElementById('total').textContent = subtotal;
+            cartTotal.style.display = 'block';
+        }
+
+        // Update cart item quantity
+        function updateCartItemQuantity(itemId, delta) {
+            const item = cart.find(i => i.item_id === itemId);
+            if (!item) return;
+
+            const menuItem = menuItems.find(m => m.item_id === itemId);
+            const newQty = item.quantity + delta;
+
+            if (newQty <= 0) {
+                removeFromCart(itemId);
+            } else if (menuItem && newQty <= menuItem.stock) {
+                item.quantity = newQty;
+                updateCart();
+                displayMenu(currentCategory);
+            } else {
+                showToast(`Only ${menuItem.stock} items available in stock`);
+            }
+        }
+
+        // Remove from Cart
+        function removeFromCart(itemId) {
+            cart = cart.filter(item => item.item_id !== itemId);
+            updateCart();
+            displayMenu(currentCategory);
+            showToast('Item removed from cart');
+        }
+
+        // ✅ FIXED: Checkout with Addon Data
+        async function checkout() {
+            if (cart.length === 0) {
+                alert('Cart is empty');
+                return;
+            }
+
+            console.log('=== Starting Checkout ===');
+            console.log('Cart contents:', cart);
+
+            const invalidItems = cart.filter(item => !item.item_id && !item.id);
+            
+            if (invalidItems.length > 0) {
+                console.error('❌ Invalid items in cart:', invalidItems);
+                alert('Error: Some items in your cart are invalid. Please refresh the page.');
+                return;
+            }
+
+            const totalAmount = cart.reduce((sum, item) => {
+                let price = item.base_price || item.price;
+
+                if (item.is_default_meal && item.selectedAddon && item.selectedAddon !== 'none') {
+                    if (item.selectedAddon === 'egg') price += 15;
+                    else if (item.selectedAddon === 'chicken') price += 30;
+                }
+
+                return sum + (price * item.quantity);
+            }, 0);
+
+            console.log('Total amount:', totalAmount);
+
+            const orderItems = cart.map(item => {
+                const itemId = item.item_id || item.id;
+                
+                // Calculate final price with addon
+                let finalPrice = item.base_price || item.price;
+                if (item.is_default_meal && item.selectedAddon && item.selectedAddon !== 'none') {
+                    if (item.selectedAddon === 'egg') finalPrice += 15;
+                    else if (item.selectedAddon === 'chicken') finalPrice += 30;
+                }
+                
+                return {
+                    item_id: itemId,
+                    id: itemId,
+                    name: item.name,
+                    quantity: item.quantity,
+                    price: finalPrice,
+                    image_url: item.image_url,
+                    is_default_meal: item.is_default_meal || false,
+                    base_ingredients: item.base_ingredients || null,
+                    selectedAddon: item.selectedAddon || null
+                };
+            });
+
+            console.log('Order items being sent:', orderItems);
+
+            try {
+                const response = await fetch(`${API_URL}/orders/create-payment`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({
+                        items: orderItems,
+                        totalAmount: totalAmount
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('❌ Payment creation failed:', errorText);
+                    alert('Payment creation failed: ' + errorText);
+                    return;
+                }
+
+                const data = await response.json();
+                console.log('✅ Payment order created:', data);
+
+                const options = {
+                    key: data.key,
+                    amount: data.amount,
+                    currency: 'INR',
+                    name: 'Campus Canteen',
+                    description: 'Food Order',
+                    order_id: data.razorpayOrderId,
+                    handler: function (payment) {
+                        console.log('✅ Payment successful:', payment);
+                        verifyPayment(data.orderId, payment, orderItems, totalAmount);
+                    },
+                    prefill: {
+                        name: currentUser.name,
+                        email: currentUser.email,
+                        contact: currentUser.phone || ''
+                    },
+                    theme: { color: '#ff6b35' },
+                    modal: {
+                        ondismiss: function() {
+                            console.log('⚠️ Payment cancelled by user');
+                        }
+                    }
+                };
+
+                const razorpay = new Razorpay(options);
+                razorpay.open();
+
+            } catch (err) {
+                console.error('❌ Checkout error:', err);
+                alert('Checkout failed: ' + err.message);
+            }
+        }
+
+        // Verify Payment
+        async function verifyPayment(orderId, payment, items, totalAmount) {
+            console.log('=== Verifying Payment ===');
+
+            try {
+                const response = await fetch(`${API_URL}/orders/verify-payment`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({
+                        orderId,
+                        razorpayOrderId: payment.razorpay_order_id,
+                        razorpayPaymentId: payment.razorpay_payment_id,
+                        razorpaySignature: payment.razorpay_signature,
+                        items: items,
+                        totalAmount: totalAmount
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    console.log('✅ Order placed successfully');
+                    
+                    const newOrder = {
+                        order_id: data.orderId || orderId,
+                        status: 'active',
+                        total_amount: totalAmount,
+                        created_at: new Date().toISOString(),
+                        items_summary: items.map(i => `${i.name} x${i.quantity}`).join(', '),
+                        qrData: data.qrData || data.qr_data
+                    };
+
+                    activeOrders.unshift(newOrder);
+                    
+                    cart = [];
+                    updateCart();
+                    
+                    showQRModal(newOrder.order_id, newOrder.qrData);
+                    showToast('Payment successful! 🎉');
+                    
+                    setTimeout(() => {
+                        loadOrders();
+                        loadMenu();
+                    }, 1000);
+                } else {
+                    console.error('❌ Payment verification failed:', data);
+                    alert(data.error || 'Payment verification failed');
+                }
+
+            } catch (err) {
+                console.error('❌ Payment verification error:', err);
+                alert('Payment verification error: ' + err.message);
+            }
+        }
+
+        // Load Orders
+        // Load Orders
+async function loadOrders() {
+    try {
+        const res = await fetch(`${API_URL}/orders/my-orders`, {
+            headers: {
+                Authorization: `Bearer ${authToken}`
+            }
+        });
+
+        const orders = await res.json();
+        console.log('📋 === ORDERS API RESPONSE ===');
+        console.log('Total orders received:', orders.length);
+        
+        // Debug first order structure
+        if (orders.length > 0) {
+            console.log('📦 First order structure:');
+            console.log('- order_id:', orders[0].order_id);
+            console.log('- has items array?', Array.isArray(orders[0].items));
+            console.log('- items count:', orders[0].items?.length);
+            console.log('- items:', orders[0].items);
+            console.log('- items_summary:', orders[0].items_summary);
+            
+            if (orders[0].items && orders[0].items[0]) {
+                console.log('📝 First item in order:');
+                console.log('  - item_name:', orders[0].items[0].item_name);
+                console.log('  - name:', orders[0].items[0].name);
+                console.log('  - quantity:', orders[0].items[0].quantity);
+                console.log('  - price:', orders[0].items[0].price);
+                console.log('  - selectedAddon:', orders[0].items[0].selectedAddon);
+                console.log('  - addon:', orders[0].items[0].addon);
+                console.log('  - selected_addon:', orders[0].items[0].selected_addon);
+            }
+        }
+
+        activeOrders = orders.filter(o => o.status === 'active');
+        completedOrders = orders.filter(o => o.status === 'completed');
+
+        console.log('✅ Active orders:', activeOrders.length);
+        console.log('✅ Completed orders:', completedOrders.length);
+
+        displayOrders();
+    } catch (err) {
+        console.error('❌ Failed to load orders:', err);
+    }
+}
+
+        // ✅ ENHANCED: Display Orders with Addon Details
+        function displayOrders() {
+            const activeContainer = document.getElementById('activeOrders');
+            const completedContainer = document.getElementById('completedOrders');
+
+            if (activeOrders.length === 0) {
+                activeContainer.innerHTML = '<p style="text-align: center; color: #999; padding: 50px;">No active orders</p>';
+            } else {
+                activeContainer.innerHTML = '';
+                activeOrders.forEach(order => {
+                    const orderCard = createOrderCard(order);
+                    activeContainer.appendChild(orderCard);
+                });
+            }
+
+            if (completedOrders.length === 0) {
+                completedContainer.innerHTML = '<p style="text-align: center; color: #999; padding: 50px;">No completed orders</p>';
+            } else {
+                completedContainer.innerHTML = '';
+                completedOrders.forEach(order => {
+                    const orderCard = createOrderCard(order);
+                    completedContainer.appendChild(orderCard);
+                });
+            }
+        }
+
+        // ✅ FIXED: Create Order Card with Complete Addon Information Display
+        // ✅ FIXED: Create Order Card with Complete Addon Information Display
+function createOrderCard(order) {
+    const card = document.createElement('div');
+    card.className = 'order-card';
+
+    const statusClass = `status-${order.status}`;
+    const statusText = order.status.charAt(0).toUpperCase() + order.status.slice(1);
+
+    // ✅ Build items display with full addon details
+    let itemsHTML = '';
+    
+    console.log('📦 Creating order card for:', order.order_id);
+    console.log('Order has items array?', Array.isArray(order.items));
+    console.log('Items:', order.items);
+    
+    // Try to use the items array first (most detailed)
+    if (order.items && Array.isArray(order.items) && order.items.length > 0) {
+        console.log('✅ Using items array');
+        
+        itemsHTML = order.items.map(item => {
+            // Get the item name - handle different property names
+            const itemName = item.item_name || item.name || 'Unknown Item';
+            const itemQty = item.quantity || 1;
+            const itemPrice = item.price || 0;
+            
+            let displayText = `${itemName} x${itemQty}`;
+            let addonBadge = '';
+            
+            // Check for addon information in multiple possible formats
+            const addon = item.selectedAddon || item.addon || item.selected_addon;
+            
+            console.log(`Item: ${itemName}, Addon:`, addon);
+            
+            if (addon && addon !== 'none') {
+                const addonName = addon.charAt(0).toUpperCase() + addon.slice(1);
+                const addonPrice = addon === 'egg' ? 15 : 30;
+                addonBadge = ` <span style="background:#fff3e6;color:#ff6b35;padding:3px 10px;border-radius:10px;font-size:11px;font-weight:600;margin-left:8px;">+ ${addonName} (₹${addonPrice})</span>`;
+            }
+            
+            // Calculate item total
+            const itemTotal = itemPrice * itemQty;
+            
+            return `
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f5f5f5;">
+                    <span style="flex:1;display:flex;align-items:center;">
+                        ${displayText}${addonBadge}
+                    </span>
+                    <span style="font-weight:600;color:#333;margin-left:15px;">₹${itemTotal}</span>
+                </div>
+            `;
+        }).join('');
+    } 
+    // Fallback to items_summary if items array not available
+    else if (order.items_summary) {
+        console.log('⚠️ Falling back to items_summary:', order.items_summary);
+        
+        itemsHTML = order.items_summary.split(',').map(text => {
+            const trimmedText = text.trim();
+            
+            return `
+                <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f5f5f5;">
+                    <span>${trimmedText}</span>
+                </div>
+            `;
+        }).join('');
+    } 
+    // Last resort - no items info
+    else {
+        console.warn('❌ No items data found in order:', order.order_id);
+        itemsHTML = '<p style="color:#999;text-align:center;padding:20px;">No item details available</p>';
+    }
+
+    card.innerHTML = `
+        <div class="order-header">
+            <div>
+                <div style="font-weight: bold; font-size: 18px;">Order #${order.order_id}</div>
+                <div style="color: #666; font-size: 14px;">${new Date(order.created_at).toLocaleString()}</div>
+            </div>
+            <span class="order-status ${statusClass}">${statusText}</span>
+        </div>
+        
+        <div style="margin:15px 0;">
+            ${itemsHTML}
+        </div>
+        
+        <div style="margin-top: 15px; padding-top: 15px; border-top: 2px solid #f0f0f0;">
+            <div style="display: flex; justify-content: space-between; font-size: 18px; font-weight: bold;">
+                <span>Total:</span>
+                <span style="color:#ff6b35;">₹${order.total_amount}</span>
+            </div>
+        </div>
+        
+        ${order.status === 'active' && order.qr_data ? `
+            <button class="show-qr-btn" onclick="showQRModal('${order.order_id}', '${order.qr_data}')">
+                📱 Show QR Code
+            </button>
+        ` : ''}
+    `;
+
+    return card;
+}   
+
+        // Show QR Modal
+        function showQRModal(orderId, qrData) {
+            const modal = document.getElementById('qrModalOverlay');
+            const qrImage = document.getElementById('qrCodeImage');
+            const qrOrderIdEl = document.getElementById('qrOrderId');
+            
+            qrImage.src = qrData;
+            qrOrderIdEl.textContent = `Order #${orderId}`;
+            
+            modal.classList.add('active');
+        }
+
+        // Close QR Modal
+        function closeQRModal(event) {
+            if (!event || event.target.id === 'qrModalOverlay' || event.target.classList.contains('qr-close-btn')) {
+                document.getElementById('qrModalOverlay').classList.remove('active');
+            }
+        }
+
+        // Update Order Status
+        function updateOrderStatus(order) {
+            const index = activeOrders.findIndex(o => o.order_id === order.order_id);
+            if (index !== -1) {
+                activeOrders[index] = order;
+                if (order.status === 'completed') {
+                    activeOrders.splice(index, 1);
+                    completedOrders.unshift(order);
+                }
+                displayOrders();
+
+                if (order.status === 'ready') {
+                    showToast(`Order #${order.order_id} is ready for pickup! 🎉`);
+                    if ('Notification' in window && Notification.permission === 'granted') {
+                        new Notification('Order Ready!', {
+                            body: `Your order #${order.order_id} is ready for pickup!`,
+                            icon: '🍽️'
+                        });
+                    }
+                }
+            }
+        }
+
+        // Switch Tab
+        function switchTab(event, tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById(`${tab}Tab`).classList.add('active');
+        }
+
+        // User Dropdown
+        function toggleUserDropdown() {
+            const dropdown = document.getElementById('userDropdown');
+            dropdown.classList.toggle('active');
+        }
+
+        document.addEventListener('click', (e) => {
+            const dropdown = document.getElementById('userDropdown');
+            const avatar = document.getElementById('userAvatar');
+            if (dropdown && !dropdown.contains(e.target) && !avatar.contains(e.target)) {
+                dropdown.classList.remove('active');
+            }
+        });
+
+        // Show Edit Profile Modal
+        function showEditProfile() {
+            document.getElementById('userDropdown').classList.remove('active');
+            document.getElementById('editName').value = currentUser.name;
+            document.getElementById('editPicture').value = currentUser.picture || '';
+            document.getElementById('editProfileModal').classList.add('active');
+        }
+
+        // Update Profile
+        async function updateProfile() {
+            const name = document.getElementById('editName').value;
+            const picture = document.getElementById('editPicture').value;
+
+            try {
+                const response = await fetch(`${API_URL}/users/profile`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({ name, picture })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    currentUser.name = name;
+                    currentUser.picture = picture;
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                    
+                    document.getElementById('userName').textContent = name;
+                    const avatarContainer = document.getElementById('userAvatar');
+                    if (picture) {
+                        avatarContainer.innerHTML = `<img src="${picture}" alt="Profile">`;
+                    }
+
+                    showSuccess('editProfileSuccess', 'Profile updated successfully!');
+                    setTimeout(() => {
+                        closeModal('editProfileModal');
+                    }, 1500);
+                } else {
+                    showError('editProfileError', data.error || 'Failed to update profile');
+                }
+            } catch (error) {
+                console.error('Update profile error:', error);
+                showError('editProfileError', 'Failed to connect to server');
+            }
+        }
+
+        // Show Change Password Modal
+        function showChangePassword() {
+            document.getElementById('userDropdown').classList.remove('active');
+            document.getElementById('changePasswordForm').reset();
+            document.getElementById('changePasswordModal').classList.add('active');
+        }
+
+        // Change Password
+        async function changePassword() {
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (newPassword !== confirmPassword) {
+                showError('changePasswordError', 'New passwords do not match');
+                return;
+            }
+
+            if (newPassword.length < 6) {
+                showError('changePasswordError', 'Password must be at least 6 characters');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/users/password`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({ currentPassword, newPassword })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showSuccess('changePasswordSuccess', 'Password changed successfully!');
+                    setTimeout(() => {
+                        closeModal('changePasswordModal');
+                    }, 1500);
+                } else {
+                    showError('changePasswordError', data.error || 'Failed to change password');
+                }
+            } catch (error) {
+                console.error('Change password error:', error);
+                showError('changePasswordError', 'Failed to connect to server');
+            }
+        }
+
+        // Show Payment History Modal
+        async function showPaymentHistory() {
+            document.getElementById('userDropdown').classList.remove('active');
+            document.getElementById('paymentHistoryModal').classList.add('active');
+            
+            try {
+                const response = await fetch(`${API_URL}/payments/history`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                const payments = await response.json();
+                const container = document.getElementById('paymentHistoryContent');
+
+                if (payments.length === 0) {
+                    container.innerHTML = '<p style="text-align: center; color: #999; padding: 30px;">No payment history</p>';
+                } else {
+                    container.innerHTML = `
+                        <table class="payment-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Order ID</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${payments.map(payment => `
+                                    <tr>
+                                        <td>${new Date(payment.created_at).toLocaleDateString()}</td>
+                                        <td>${payment.order_id}</td>
+                                        <td>₹${payment.amount}</td>
+                                        <td>
+                                            <span class="payment-status payment-${payment.status}">
+                                                ${payment.status}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    `;
+                }
+            } catch (error) {
+                console.error('Failed to load payment history:', error);
+                document.getElementById('paymentHistoryContent').innerHTML = 
+                    '<p style="text-align: center; color: #f44; padding: 30px;">Failed to load payment history</p>';
+            }
+        }
+
+        // Show Feedback Modal
+        function showFeedback() {
+            document.getElementById('userDropdown').classList.remove('active');
+            document.getElementById('feedbackForm').reset();
+            document.getElementById('feedbackRating').value = '0';
+            document.querySelectorAll('.star').forEach(star => star.classList.remove('active'));
+            document.getElementById('feedbackModal').classList.add('active');
+        }
+
+        // Set Rating
+        function setRating(rating) {
+            document.getElementById('feedbackRating').value = rating;
+            document.querySelectorAll('.star').forEach(star => {
+                if (parseInt(star.getAttribute('data-rating')) <= parseInt(rating)) {
+                    star.classList.add('active');
+                } else {
+                    star.classList.remove('active');
+                }
+            });
+        }
+
+        // Submit Feedback
+        async function submitFeedback() {
+            const rating = document.getElementById('feedbackRating').value;
+            const category = document.getElementById('feedbackCategory').value;
+            const message = document.getElementById('feedbackMessage').value;
+
+            if (rating === '0') {
+                showError('feedbackError', 'Please select a rating');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/feedback`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({ rating, category, message })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showSuccess('feedbackSuccess', 'Thank you for your feedback!');
+                    setTimeout(() => {
+                        closeModal('feedbackModal');
+                    }, 1500);
+                } else {
+                    showError('feedbackError', data.error || 'Failed to submit feedback');
+                }
+            } catch (error) {
+                console.error('Submit feedback error:', error);
+                showError('feedbackError', 'Failed to connect to server');
+            }
+        }
+
+        // Show Compliance Modal
+        function showCompliance() {
+            document.getElementById('userDropdown').classList.remove('active');
+            document.getElementById('complianceModal').classList.add('active');
+        }
+
+        // Close Modal
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+            const errorElement = document.querySelector(`#${modalId} .error-message`);
+            const successElement = document.querySelector(`#${modalId} .success-message`);
+            if (errorElement) errorElement.style.display = 'none';
+            if (successElement) successElement.style.display = 'none';
+        }
+
+        // Logout
+        function logout() {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('currentUser');
+            if (socket) socket.disconnect();
+            location.reload();
+        }
+
+        // Show Error
+        function showError(elementId, message) {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.style.display = 'block';
+            setTimeout(() => {
+                element.style.display = 'none';
+            }, 5000);
+        }
+
+        // Show Success
+        function showSuccess(elementId, message) {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.style.display = 'block';
+            setTimeout(() => {
+                element.style.display = 'none';
+            }, 3000);
+        }
+
+        // Show Toast
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerText = message;
+
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        // Request Notification Permission
+        if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission();
+        }
+    </script>
+</body>
+</html>

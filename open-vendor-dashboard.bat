@@ -3,4 +3,4 @@ echo Opening Vendor Dashboard...
 echo.
 echo ⚠️ Remember to grant camera permissions when asked!
 echo.
-start vendor-dashboard\index.html
+start http://localhost:3001/vendor/

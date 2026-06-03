@@ -30,9 +30,9 @@ echo   Email: vendor@canteen.com
 echo   Password: vendor123
 echo ========================================
 echo.
-echo 📱 Open these files in your browser:
-echo   - student-app\index.html
-echo   - vendor-dashboard\index.html
+echo 📱 Open these URLs in your browser:
+echo   - http://localhost:3001/student/
+echo   - http://localhost:3001/vendor/
 echo.
 echo ⚠️  KEEP THIS WINDOW OPEN while using the app!
 echo Press Ctrl+C to stop the server

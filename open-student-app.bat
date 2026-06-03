@@ -1,3 +1,3 @@
 @echo off
 echo Opening Student App...
-start student-app\index.html
+start http://localhost:3001/student/

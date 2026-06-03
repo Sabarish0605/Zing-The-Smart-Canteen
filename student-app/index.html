@@ -2141,6 +2141,23 @@
                 const data = await response.json();
                 console.log('✅ Payment order created:', data);
 
+                const isRealRazorpayKey = data.key && 
+                                          typeof data.key === 'string' && 
+                                          data.key.startsWith('rzp_') && 
+                                          !/placeholder|your_key|YOUR_KEY/i.test(data.key) && 
+                                          data.key.length >= 15;
+
+                if (!isRealRazorpayKey) {
+                    console.log('🔮 Razorpay keys not configured or dummy key found. Simulating payment success...');
+                    const mockPayment = {
+                        razorpay_order_id: data.razorpayOrderId || ('mock_rzp_order_' + Date.now()),
+                        razorpay_payment_id: 'mock_rzp_payment_' + Date.now(),
+                        razorpay_signature: 'mock_rzp_sig_' + Date.now()
+                    };
+                    verifyPayment(data.orderId, mockPayment, orderItems, totalAmount);
+                    return;
+                }
+
                 const options = {
                     key: data.key,
                     amount: data.amount,

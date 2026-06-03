@@ -112,6 +112,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/student', express.static(path.join(__dirname, '..', 'student-app')));
+app.use('/vendor', express.static(path.join(__dirname, '..', 'vendor-dashboard')));
 
 // ============ Auth Middleware ============
 const authenticateToken = (req, res, next) => {

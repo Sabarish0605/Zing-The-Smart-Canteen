@@ -2163,19 +2163,13 @@ function createOrderCard(order) {
             
             console.log(`Item: ${itemName}`);
             
-            if (addon && addon !== 'none') {
-                const addonName = addon.charAt(0).toUpperCase() + addon.slice(1);
-                const addonPrice = addon === 'egg' ? 15 : 30;
-                addonBadge = ` <span style="background:#fff3e6;color:#ff6b35;padding:3px 10px;border-radius:10px;font-size:11px;font-weight:600;margin-left:8px;">+ ${addonName} (₹${addonPrice})</span>`;
-            }
-            
             // Calculate item total
             const itemTotal = itemPrice * itemQty;
             
             return `
                 <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f5f5f5;">
                     <span style="flex:1;display:flex;align-items:center;">
-                        ${displayText}${addonBadge}
+                        ${displayText}
                     </span>
                     <span style="font-weight:600;color:#333;margin-left:15px;">₹${itemTotal}</span>
                 </div>

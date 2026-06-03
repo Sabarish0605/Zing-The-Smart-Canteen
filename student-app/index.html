@@ -184,72 +184,6 @@
             50% { transform: translateY(-10px); }
         }
 
-        /* ✅ FIXED: Add-on Selection Styles - Radio Button Style */
-        .addon-section {
-            margin-top: 12px;
-            padding: 12px;
-            background: #fff9f0;
-            border-radius: 10px;
-            border: 1px dashed #ff6b35;
-        }
-
-        .addon-title {
-            font-size: 13px;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 8px;
-        }
-
-        .addon-options {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        /* ✅ CHANGED: Using radio buttons instead of checkboxes */
-        .addon-radio-label {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 6px 10px;
-            background: white;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 13px;
-        }
-
-        .addon-radio-label:hover {
-            border-color: #ff6b35;
-            background: #fff3e6;
-        }
-
-        .addon-radio-label input[type="radio"] {
-            width: 16px;
-            height: 16px;
-            cursor: pointer;
-        }
-
-        .addon-radio-label.checked {
-            background: #fff3e6;
-            border-color: #ff6b35;
-            font-weight: 600;
-        }
-
-        .addon-price-tag {
-            color: #ff6b35;
-            font-weight: 700;
-        }
-
-        .base-included-note {
-            margin-top: 8px;
-            font-size: 11px;
-            color: #27ae60;
-            font-weight: 600;
-            text-align: center;
-        }
-
         .header-content p {
             color: rgba(255, 255, 255, 0.95);
             font-size: 16px;
@@ -594,7 +528,7 @@
             cursor: not-allowed;
         }
 
-        /* ✅ ENHANCED: Cart Styles */
+        /* Cart Styles */
         .cart-container {
             background: white;
             border-radius: 15px;
@@ -620,7 +554,6 @@
             gap: 15px;
         }
 
-        /* ✅ ADDED: Cart quantity control styling */
         .cart-quantity-control {
             display: flex;
             align-items: center;
@@ -1701,7 +1634,6 @@
                 alert('Failed to load menu. Please refresh the page.');
             }
         }
-        // ✅ FIXED: Display Menu with Radio Buttons for Addons
         function displayMenu(category = 'all') {
             const menuGrid = document.getElementById('menuGrid');
             menuGrid.innerHTML = '';
@@ -1720,7 +1652,6 @@
                 const itemIndex = menuItems.findIndex(mi => mi.item_id === item.item_id);
                 const cartItem = cart.find(c => c.item_id === item.item_id);
                 const currentQty = cartItem ? cartItem.quantity : 0;
-                const selectedAddon = cartItem?.selectedAddon || 'none';
                 
                 const itemCard = document.createElement('div');
                 itemCard.className = 'menu-item';
@@ -1746,59 +1677,13 @@
                     instantMealBadge = '<span class="instant-meal-badge">🔥 Instant Meal</span>';
                 }
 
-                // ✅ FIXED: Build addon UI with RADIO buttons (mutually exclusive)
-                let addonHTML = '';
-                if (item.is_default_meal) {
-                    const radioName = `addon-${itemIndex}`;
-                    addonHTML = `
-                        <div class="addon-section">
-                            <div class="addon-title">🍳 Choose One Extra (Optional)</div>
-                            <div class="addon-options">
-                                <label class="addon-radio-label ${selectedAddon === 'none' ? 'checked' : ''}" id="addon-none-label-${itemIndex}">
-                                    <input type="radio" 
-                                           name="${radioName}" 
-                                           class="addon-radio" 
-                                           id="addon-none-${itemIndex}"
-                                           value="none"
-                                           ${selectedAddon === 'none' ? 'checked' : ''}
-                                           onchange="selectAddon(${itemIndex}, 'none')">
-                                    <span>❌ None</span>
-                                </label>
-                                <label class="addon-radio-label ${selectedAddon === 'egg' ? 'checked' : ''}" id="addon-egg-label-${itemIndex}">
-                                    <input type="radio" 
-                                           name="${radioName}" 
-                                           class="addon-radio" 
-                                           id="addon-egg-${itemIndex}"
-                                           value="egg"
-                                           ${selectedAddon === 'egg' ? 'checked' : ''}
-                                           onchange="selectAddon(${itemIndex}, 'egg')">
-                                    <span>🥚 Egg <span class="addon-price-tag">+₹15</span></span>
-                                </label>
-                                <label class="addon-radio-label ${selectedAddon === 'chicken' ? 'checked' : ''}" id="addon-chicken-label-${itemIndex}">
-                                    <input type="radio" 
-                                           name="${radioName}" 
-                                           class="addon-radio" 
-                                           id="addon-chicken-${itemIndex}"
-                                           value="chicken"
-                                           ${selectedAddon === 'chicken' ? 'checked' : ''}
-                                           onchange="selectAddon(${itemIndex}, 'chicken')">
-                                    <span>🍗 Chicken <span class="addon-price-tag">+₹30</span></span>
-                                </label>
-                            </div>
-                            <div class="base-included-note">✓ ${item.name === 'Veg Fried Rice' ? 'Rice' : 'Noodles'} & Veg included in base price</div>
-                        </div>
-                    `;
-                }
-
                 itemCard.innerHTML = `
                     <img src="${item.image_url}" alt="${item.name}" class="item-image">
                     <div class="item-details">
                         <div class="item-category">${item.category}${stockBadge}${instantMealBadge}</div>
                         <div class="item-name">${item.name}</div>
                         <div style="color: #666; font-size: 14px;">${item.description}</div>
-                        <div class="item-price">₹${item.price}${item.is_default_meal ? ' <span style="font-size:12px;color:#999;">(base)</span>' : ''}</div>
-
-                        ${addonHTML}
+                        <div class="item-price">₹${item.price}</div>
 
                         <div class="item-actions">
                             ${currentQty > 0 ? `
@@ -1822,26 +1707,7 @@
             });
         }
 
-        // ✅ NEW: Select Addon (handles radio button logic)
-        function selectAddon(itemIndex, addonType) {
-            const item = menuItems[itemIndex];
-            if (!item || !item.is_default_meal) return;
 
-            // Update visual state of labels
-            ['none', 'egg', 'chicken'].forEach(type => {
-                const label = document.getElementById(`addon-${type}-label-${itemIndex}`);
-                if (label) {
-                    label.classList.toggle('checked', type === addonType);
-                }
-            });
-
-            // Update cart item if already in cart
-            const cartItem = cart.find(c => c.item_id === item.item_id);
-            if (cartItem) {
-                cartItem.selectedAddon = addonType;
-                updateCart();
-            }
-        }
 
         // Filter by Category
         function filterByCategory(category) {
@@ -1926,48 +1792,22 @@
 
             const existingItem = cart.find(i => i.item_id === itemId);
 
-            // ✅ Get selected addon for default meals
-            let selectedAddon = 'none';
-            if (item.is_default_meal) {
-                const noneRadio = document.getElementById(`addon-none-${index}`);
-                const eggRadio = document.getElementById(`addon-egg-${index}`);
-                const chickenRadio = document.getElementById(`addon-chicken-${index}`);
-                
-                if (eggRadio?.checked) selectedAddon = 'egg';
-                else if (chickenRadio?.checked) selectedAddon = 'chicken';
-                else selectedAddon = 'none';
-            }
-
             if (existingItem) {
-                // Update quantity and addon
+                // Update quantity
                 if (existingItem.quantity < item.stock) {
                     existingItem.quantity += 1;
-                    if (item.is_default_meal) {
-                        existingItem.selectedAddon = selectedAddon;
-                    }
-                    console.log(`✅ Updated quantity for ${item.name}:`, existingItem.quantity);
                 } else {
-                    showToast(`Only ${item.stock} items available in stock`);
-                    return;
+                    showToast('Max stock reached');
                 }
             } else {
-                // Add new item
-                const cartItem = {
+                cart.push({
                     item_id: itemId,
-                    id: itemId,
                     name: item.name,
                     price: item.price,
-                    base_price: item.price,
                     image_url: item.image_url,
-                    quantity: 1,
-                    cartIndex: index,
-                    is_default_meal: item.is_default_meal || false,
-                    base_ingredients: item.base_ingredients || null,
-                    selectedAddon: item.is_default_meal ? selectedAddon : null
-                };
-                
-                cart.push(cartItem);
-                console.log(`✅ Added ${item.name} to cart:`, cartItem);
+                    quantity: 1
+                });
+                console.log(`✅ Added ${item.name} to cart`);
             }
 
             updateCart();
@@ -1994,18 +1834,7 @@
 
             cart.forEach(item => {
                 // Calculate price with addon
-                let displayPrice = item.base_price || item.price;
-                let addonText = '';
-                
-                if (item.is_default_meal && item.selectedAddon && item.selectedAddon !== 'none') {
-                    if (item.selectedAddon === 'egg') {
-                        displayPrice += 15;
-                        addonText = ' + Egg (₹15)';
-                    } else if (item.selectedAddon === 'chicken') {
-                        displayPrice += 30;
-                        addonText = ' + Chicken (₹30)';
-                    }
-                }
+                let displayPrice = item.price;
                 
                 const itemTotal = displayPrice * item.quantity;
                 subtotal += itemTotal;
@@ -2015,7 +1844,6 @@
                 cartItem.innerHTML = `
                     <div class="cart-item-info">
                         <div style="font-weight:600">${item.name}</div>
-                        ${addonText ? `<div style="color:#ff6b35;font-size:12px;">${addonText}</div>` : ''}
                         <div style="color:#666">₹${displayPrice} each</div>
                     </div>
                     <div class="cart-item-controls">
@@ -2081,12 +1909,7 @@
             }
 
             const totalAmount = cart.reduce((sum, item) => {
-                let price = item.base_price || item.price;
-
-                if (item.is_default_meal && item.selectedAddon && item.selectedAddon !== 'none') {
-                    if (item.selectedAddon === 'egg') price += 15;
-                    else if (item.selectedAddon === 'chicken') price += 30;
-                }
+                let price = item.price;
 
                 return sum + (price * item.quantity);
             }, 0);
@@ -2094,25 +1917,16 @@
             console.log('Total amount:', totalAmount);
 
             const orderItems = cart.map(item => {
-                const itemId = item.item_id || item.id;
-                
-                // Calculate final price with addon
-                let finalPrice = item.base_price || item.price;
-                if (item.is_default_meal && item.selectedAddon && item.selectedAddon !== 'none') {
-                    if (item.selectedAddon === 'egg') finalPrice += 15;
-                    else if (item.selectedAddon === 'chicken') finalPrice += 30;
-                }
+                let finalPrice = item.price;
                 
                 return {
-                    item_id: itemId,
-                    id: itemId,
+                    item_id: item.item_id || item.id,
                     name: item.name,
-                    quantity: item.quantity,
                     price: finalPrice,
+                    quantity: item.quantity,
                     image_url: item.image_url,
                     is_default_meal: item.is_default_meal || false,
-                    base_ingredients: item.base_ingredients || null,
-                    selectedAddon: item.selectedAddon || null
+                    base_ingredients: item.base_ingredients || null
                 };
             });
 
@@ -2278,9 +2092,6 @@ async function loadOrders() {
                 console.log('  - name:', orders[0].items[0].name);
                 console.log('  - quantity:', orders[0].items[0].quantity);
                 console.log('  - price:', orders[0].items[0].price);
-                console.log('  - selectedAddon:', orders[0].items[0].selectedAddon);
-                console.log('  - addon:', orders[0].items[0].addon);
-                console.log('  - selected_addon:', orders[0].items[0].selected_addon);
             }
         }
 
@@ -2349,12 +2160,8 @@ function createOrderCard(order) {
             const itemPrice = item.price || 0;
             
             let displayText = `${itemName} x${itemQty}`;
-            let addonBadge = '';
             
-            // Check for addon information in multiple possible formats
-            const addon = item.selectedAddon || item.addon || item.selected_addon;
-            
-            console.log(`Item: ${itemName}, Addon:`, addon);
+            console.log(`Item: ${itemName}`);
             
             if (addon && addon !== 'none') {
                 const addonName = addon.charAt(0).toUpperCase() + addon.slice(1);

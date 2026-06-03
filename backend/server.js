@@ -131,12 +131,8 @@ const authenticateToken = (req, res, next) => {
 
 // ============ Helper Functions ============
 function isMealAvailable(item) {
-  if (!item.is_meal_locked) return true;
-  
-  const now = new Date();
-  const currentTime = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-  
-  return currentTime >= item.meal_start_time && currentTime <= item.meal_end_time;
+  // Meal time lock feature removed per user request
+  return true;
 }
 
 // ✅ NEW: Recipe definitions for instant meals
@@ -752,12 +748,17 @@ app.delete('/api/menu/:id', authenticateToken, (req, res) => {
   }
 
   const { id } = req.params;
+  console.log(`[DELETE /api/menu/:id] Request received for id: ${id}, user role: ${req.user.role}`);
   
   db.get('SELECT image_url FROM menu_items WHERE id = ?', [id], (err, item) => {
     if (item && item.image_url && item.image_url.startsWith('/uploads')) {
       const imagePath = path.join(__dirname, item.image_url);
       if (fs.existsSync(imagePath)) {
-        fs.unlinkSync(imagePath);
+        try {
+          fs.unlinkSync(imagePath);
+        } catch (err) {
+          console.error('Failed to delete image:', err);
+        }
       }
     }
     

@@ -1,0 +1,149 @@
+<!-- File: vendor-web/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vendor Dashboard | Zing</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- WebSocket Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@5.0.0/bundles/stomp.umd.min.js"></script>
+    
+    <!-- QR Scanner -->
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+
+    <style>
+        .hidden-section { display: none !important; }
+        .toast { transition: opacity 0.3s ease-in-out; }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans antialiased text-gray-900">
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-5 right-5 bg-green-500 text-white px-6 py-3 rounded shadow-lg hidden-section z-50">
+        Notification message
+    </div>
+
+    <!-- LOGIN SECTION -->
+    <div id="loginSection" class="min-h-screen flex items-center justify-center">
+        <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+            <h1 class="text-3xl font-bold text-center text-indigo-600 mb-6">Zing Vendor</h1>
+            <form id="loginForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Email</label>
+                    <input type="email" id="email" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Password</label>
+                    <input type="password" id="password" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                <button type="submit" class="w-full bg-indigo-600 text-white py-2 px-4 rounded hover:bg-indigo-700 transition">Log In</button>
+                <div id="loginError" class="text-red-500 text-sm mt-2 text-center hidden-section"></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- DASHBOARD SHELL -->
+    <div id="dashboardSection" class="hidden-section min-h-screen flex flex-col md:flex-row">
+        <!-- Sidebar -->
+        <aside class="w-full md:w-64 bg-indigo-800 text-white flex flex-col">
+            <div class="p-6 text-2xl font-bold border-b border-indigo-700">
+                Zing Canteen
+            </div>
+            <nav class="flex-1 px-4 py-6 space-y-2">
+                <a href="#" onclick="switchTab('orders')" id="nav-orders" class="block px-4 py-2 rounded bg-indigo-900 hover:bg-indigo-700 transition">Active Orders</a>
+                <a href="#" onclick="switchTab('menu')" id="nav-menu" class="block px-4 py-2 rounded hover:bg-indigo-700 transition">Menu Management</a>
+                <a href="#" onclick="switchTab('scanner')" id="nav-scanner" class="block px-4 py-2 rounded hover:bg-indigo-700 transition">QR Scanner</a>
+            </nav>
+            <div class="p-4 border-t border-indigo-700">
+                <button onclick="logout()" class="w-full text-left px-4 py-2 text-indigo-200 hover:text-white hover:bg-indigo-700 rounded transition">Logout</button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-8">
+            
+            <!-- Active Orders Tab -->
+            <div id="tab-orders" class="tab-content">
+                <h2 class="text-3xl font-bold mb-6">Active Orders</h2>
+                <div id="ordersList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Orders will be injected here -->
+                </div>
+            </div>
+
+            <!-- Menu Management Tab -->
+            <div id="tab-menu" class="tab-content hidden-section">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold">Menu Management</h2>
+                    <button onclick="toggleMenuModal(true)" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition">Add Item</button>
+                </div>
+                <div class="bg-white rounded-lg shadow overflow-hidden">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Image</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="menuList" class="bg-white divide-y divide-gray-200">
+                            <!-- Menu items injected here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- QR Scanner Tab -->
+            <div id="tab-scanner" class="tab-content hidden-section">
+                <h2 class="text-3xl font-bold mb-6">QR Verification</h2>
+                <div class="bg-white p-6 rounded-lg shadow max-w-2xl mx-auto">
+                    <div id="reader" width="600px"></div>
+                    <div id="scanResult" class="mt-4 text-center font-semibold text-lg"></div>
+                </div>
+            </div>
+            
+        </main>
+    </div>
+
+    <!-- Add Menu Modal -->
+    <div id="menuModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden-section flex items-center justify-center z-50">
+        <div class="bg-white p-8 border w-96 shadow-lg rounded-md">
+            <h3 class="text-xl font-bold mb-4">Add Menu Item</h3>
+            <form id="menuForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Name</label>
+                    <input type="text" id="menuName" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Price (₹)</label>
+                    <input type="number" step="0.01" id="menuPrice" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Image</label>
+                    <input type="file" id="menuImage" accept="image/*" class="mt-1 block w-full text-sm text-gray-500">
+                </div>
+                <div class="flex items-center">
+                    <input type="checkbox" id="menuAvailable" checked class="h-4 w-4 text-indigo-600 border-gray-300 rounded">
+                    <label class="ml-2 block text-sm text-gray-900">Available</label>
+                </div>
+                <div class="flex justify-end space-x-2 pt-4">
+                    <button type="button" onclick="toggleMenuModal(false)" class="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/api.js"></script>
+    <script src="js/websocket.js"></script>
+    <script src="js/scanner.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

@@ -3,7 +3,7 @@ import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 
 // NOTE: Replace YOUR_LOCAL_IP with your machine's actual IP address on your local network
-const API_BASE_URL = 'http://192.168.1.100:8080/api'; 
+const API_BASE_URL = 'https://zing-canteen-backend.onrender.com/api'; 
 
 const api = axios.create({
     baseURL: API_BASE_URL,

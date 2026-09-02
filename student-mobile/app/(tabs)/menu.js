@@ -27,9 +27,9 @@ export default function MenuScreen() {
     const renderItem = ({ item }) => (
         <View style={styles.card}>
             {item.imageUrl ? (
-                // Assuming backend is serving images at http://192.168.1.100:8080/uploads/...
+                // Assuming backend is serving images at https://zing-canteen-backend.onrender.com/uploads/...
                 // The DTO imageUrl should ideally be absolute or we prepend the base URL
-                <Image source={{ uri: `http://192.168.1.100:8080${item.imageUrl}` }} style={styles.image} />
+                <Image source={{ uri: `https://zing-canteen-backend.onrender.com${item.imageUrl}` }} style={styles.image} />
             ) : (
                 <View style={[styles.image, styles.placeholderImage]}>
                     <Text style={styles.placeholderText}>No Image</Text>

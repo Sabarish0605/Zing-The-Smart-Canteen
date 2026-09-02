@@ -1,51 +1,62 @@
-// File: student-mobile/app/index.js
-import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+// File: student-mobile/app/register.js
+import React, { useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import api from '../services/api';
 
-export default function LoginScreen() {
+export default function RegisterScreen() {
+    const [name, setName] = useState('');
+    const [rollNumber, setRollNumber] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const router = useRouter();
 
-    useEffect(() => {
-        checkToken();
-    }, []);
-
-    const checkToken = async () => {
-        const token = await SecureStore.getItemAsync('studentToken');
-        if (token) {
-            router.replace('/(tabs)/menu');
-        }
-    };
-
-    const handleLogin = async () => {
-        if (!email || !password) {
+    const handleRegister = async () => {
+        if (!name || !rollNumber || !email || !password) {
             Alert.alert('Error', 'Please fill all fields');
             return;
         }
 
         setLoading(true);
         try {
-            const response = await api.post('/auth/login', { email, password });
+            const response = await api.post('/auth/register', { 
+                name, 
+                rollNumber, 
+                email, 
+                password,
+                role: 'STUDENT'
+            });
             await SecureStore.setItemAsync('studentToken', response.data.token);
             router.replace('/(tabs)/menu');
         } catch (error) {
-            Alert.alert('Login Failed', 'Invalid credentials');
+            console.error(error);
+            Alert.alert('Registration Failed', 'Email or Roll Number might already be in use.');
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <View style={styles.container}>
+        <ScrollView contentContainerStyle={styles.container}>
             <Text style={styles.title}>Zing Canteen</Text>
-            <Text style={styles.subtitle}>Student Login</Text>
+            <Text style={styles.subtitle}>Create Student Account</Text>
             
             <View style={styles.inputContainer}>
+                <TextInput
+                    style={styles.input}
+                    placeholder="Full Name"
+                    value={name}
+                    onChangeText={setName}
+                />
+                <TextInput
+                    style={styles.input}
+                    placeholder="Roll Number"
+                    value={rollNumber}
+                    onChangeText={setRollNumber}
+                    autoCapitalize="characters"
+                />
                 <TextInput
                     style={styles.input}
                     placeholder="Email"
@@ -65,25 +76,25 @@ export default function LoginScreen() {
 
             <TouchableOpacity 
                 style={styles.button} 
-                onPress={handleLogin}
+                onPress={handleRegister}
                 disabled={loading}
             >
-                <Text style={styles.buttonText}>{loading ? 'Logging in...' : 'Login'}</Text>
+                <Text style={styles.buttonText}>{loading ? 'Creating Account...' : 'Sign Up'}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity 
                 style={styles.linkButton} 
-                onPress={() => router.push('/register')}
+                onPress={() => router.back()}
             >
-                <Text style={styles.linkText}>New here? Create an account</Text>
+                <Text style={styles.linkText}>Already have an account? Log In</Text>
             </TouchableOpacity>
-        </View>
+        </ScrollView>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
+        flexGrow: 1,
         backgroundColor: '#f9fafb',
         alignItems: 'center',
         justifyContent: 'center',
@@ -114,11 +125,12 @@ const styles = StyleSheet.create({
         fontSize: 16,
     },
     button: {
-        backgroundColor: '#4f46e5',
+        backgroundColor: '#10b981',
         width: '100%',
         padding: 15,
         borderRadius: 10,
         alignItems: 'center',
+        marginBottom: 20,
     },
     buttonText: {
         color: '#ffffff',
@@ -126,7 +138,6 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     linkButton: {
-        marginTop: 20,
         padding: 10,
     },
     linkText: {

@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: zing-canteen-backend
+    env: docker
+    rootDir: spring-backend
+    dockerfilePath: ./Dockerfile
+    plan: free
+    envVars:
+      - key: PORT
+        value: 8080
+      - key: DB_URL
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: RAZORPAY_KEY_ID
+        value: rzp_test_xxxxxx
+      - key: RAZORPAY_KEY_SECRET
+        value: xxxxxx

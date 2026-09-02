@@ -3,9 +3,9 @@ spring:
     name: zing-canteen
   
   datasource:
-    url: ${DB_URL:jdbc:mysql://localhost:3306/zing_canteen?useSSL=false&serverTimezone=UTC}
-    username: ${DB_USERNAME:root}
-    password: ${DB_PASSWORD:root}
+    url: ${DB_URL:jdbc:mysql://localhost:3306/defaultdb}
+    username: ${DB_USER:avnadmin}
+    password: ${DB_PASSWORD:}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
@@ -21,7 +21,7 @@ server:
   port: ${PORT:8080}
 
 jwt:
-  secret: ${JWT_SECRET:8f7e6d5c4b3a2910f1e2d3c4b5a69788f7e6d5c4b3a2910f1e2d3c4b5a69788f} # Default secret for dev
+  secret: ${JWT_SECRET:DefaultSuperSecretKeyThatIsLongEnoughForHMACSHA256}
   expiration: 86400000 # 24 hours
 
 razorpay:

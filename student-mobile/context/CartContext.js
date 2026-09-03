@@ -1,5 +1,6 @@
 // File: student-mobile/context/CartContext.js
 import React, { createContext, useState, useContext } from 'react';
+import { Alert } from 'react-native';
 
 const CartContext = createContext();
 
@@ -11,7 +12,7 @@ export const CartProvider = ({ children }) => {
 
     const addToCart = (item) => {
         if (selectedVendorId && selectedVendorId !== item.vendorId) {
-            alert("You can only order from one vendor at a time. Please clear your cart first.");
+            Alert.alert("Vendor Mismatch", "You can only order from one vendor at a time. Please clear your cart first.");
             return;
         }
 

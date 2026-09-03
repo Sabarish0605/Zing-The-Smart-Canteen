@@ -10,7 +10,7 @@ function connectWebSocket() {
     // or wildcard if the broker allows (Spring doesn't allow client wildcards by default).
     const vendorId = 1; // HARDCODED FOR SPA DEMO (in a real app, retrieve from API)
 
-    const socket = new SockJS('http://localhost:8080/ws-canteen');
+    const socket = new SockJS('https://zing-canteen-backend.onrender.com/ws-canteen');
     stompClient = new window.StompJs.Client({
         webSocketFactory: () => socket,
         debug: function (str) {

@@ -1,6 +1,6 @@
 // File: vendor-web/js/api.js
 
-const API_BASE = 'http://localhost:8080/api';
+const API_BASE = 'https://zing-canteen-backend.onrender.com/api';
 
 const api = {
     // Helper for fetch with Authorization
@@ -32,6 +32,24 @@ const api = {
     },
 
     // Auth
+    async register(email, password, shopName) {
+        const data = await this.request('/auth/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password, role: 'VENDOR', shopName })
+        });
+        if (data.token) {
+            localStorage.setItem('vendorToken', data.token);
+            try {
+                const payload = JSON.parse(atob(data.token.split('.')[1]));
+                localStorage.setItem('vendorEmail', payload.sub);
+            } catch (e) {
+                console.warn("Could not decode token", e);
+            }
+        }
+        return data;
+    },
+
     async login(email, password) {
         const data = await this.request('/auth/login', {
             method: 'POST',

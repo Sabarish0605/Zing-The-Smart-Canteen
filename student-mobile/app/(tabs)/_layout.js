@@ -13,9 +13,9 @@ export default function TabLayout() {
     return (
         <Tabs
             screenOptions={{
-                tabBarActiveTintColor: '#4f46e5',
+                tabBarActiveTintColor: '#FF6B00',
                 headerStyle: {
-                    backgroundColor: '#4f46e5',
+                    backgroundColor: '#FF6B00',
                 },
                 headerTintColor: '#fff',
                 headerTitleStyle: {
@@ -54,6 +54,14 @@ export default function TabLayout() {
                     title: 'My Tickets',
                     tabBarLabel: 'Tickets',
                     tabBarIcon: () => <Text style={{fontSize: 20}}>🎟️</Text>,
+                }}
+            />
+            <Tabs.Screen
+                name="profile"
+                options={{
+                    title: 'Profile',
+                    tabBarLabel: 'Profile',
+                    tabBarIcon: () => <Text style={{fontSize: 20}}>👤</Text>,
                 }}
             />
         </Tabs>

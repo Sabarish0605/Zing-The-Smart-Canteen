@@ -20,6 +20,24 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Register Form Submission
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const shopName = document.getElementById('regShopName').value;
+        const email = document.getElementById('regEmail').value;
+        const password = document.getElementById('regPassword').value;
+        const errorDiv = document.getElementById('registerError');
+        
+        try {
+            await api.register(email, password, shopName);
+            errorDiv.classList.add('hidden-section');
+            checkAuth();
+        } catch (error) {
+            errorDiv.textContent = 'Registration failed. Email might be in use.';
+            errorDiv.classList.remove('hidden-section');
+        }
+    });
+
     // Menu Form Submission (Multipart)
     document.getElementById('menuForm').addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -68,6 +86,13 @@ function checkAuth() {
         document.getElementById('loginSection').classList.remove('hidden-section');
         document.getElementById('dashboardSection').classList.add('hidden-section');
     }
+}
+
+function toggleAuthMode() {
+    document.getElementById('loginForm').classList.toggle('hidden-section');
+    document.getElementById('registerForm').classList.toggle('hidden-section');
+    document.getElementById('loginError').classList.add('hidden-section');
+    document.getElementById('registerError').classList.add('hidden-section');
 }
 
 function switchTab(tabName) {
@@ -144,7 +169,7 @@ async function loadMenu() {
             <tr>
                 <td class="px-6 py-4 whitespace-nowrap">
                     ${item.imageUrl 
-                        ? `<img src="http://localhost:8080${item.imageUrl}" class="h-10 w-10 rounded-full object-cover">` 
+                        ? `<img src="https://zing-canteen-backend.onrender.com${item.imageUrl}" class="h-10 w-10 rounded-full object-cover">` 
                         : `<div class="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500">No Img</div>`}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${item.name}</td>

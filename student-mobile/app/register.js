@@ -1,6 +1,6 @@
 // File: student-mobile/app/register.js
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import api from '../services/api';
@@ -11,13 +11,32 @@ export default function RegisterScreen() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
+    const [errors, setErrors] = useState({});
     const router = useRouter();
 
-    const handleRegister = async () => {
-        if (!name || !rollNumber || !email || !password) {
-            Alert.alert('Error', 'Please fill all fields');
-            return;
+    const validate = () => {
+        const newErrors = {};
+        if (!name.trim()) newErrors.name = 'Full name is required';
+        if (!rollNumber.trim()) newErrors.rollNumber = 'Roll number is required';
+        
+        if (!email) {
+            newErrors.email = 'Email is required';
+        } else if (!/\S+@\S+\.\S+/.test(email)) {
+            newErrors.email = 'Please enter a valid email address';
         }
+        
+        if (!password) {
+            newErrors.password = 'Password is required';
+        } else if (password.length < 6) {
+            newErrors.password = 'Password must be at least 6 characters';
+        }
+        
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
+    const handleRegister = async () => {
+        if (!validate()) return;
 
         setLoading(true);
         try {
@@ -32,7 +51,7 @@ export default function RegisterScreen() {
             router.replace('/(tabs)/menu');
         } catch (error) {
             console.error(error);
-            Alert.alert('Registration Failed', 'Email or Roll Number might already be in use.');
+            setErrors({ general: 'Registration failed. Email or Roll Number might be in use.' });
         } finally {
             setLoading(false);
         }
@@ -45,46 +64,60 @@ export default function RegisterScreen() {
             
             <View style={styles.inputContainer}>
                 <TextInput
-                    style={styles.input}
+                    style={[styles.input, errors.name && styles.inputError]}
                     placeholder="Full Name"
                     value={name}
-                    onChangeText={setName}
+                    onChangeText={(text) => { setName(text); setErrors(prev => ({...prev, name: '', general: ''})) }}
                 />
+                {errors.name ? <Text style={styles.errorText}>{errors.name}</Text> : null}
+                
                 <TextInput
-                    style={styles.input}
+                    style={[styles.input, errors.rollNumber && styles.inputError]}
                     placeholder="Roll Number"
                     value={rollNumber}
-                    onChangeText={setRollNumber}
+                    onChangeText={(text) => { setRollNumber(text); setErrors(prev => ({...prev, rollNumber: '', general: ''})) }}
                     autoCapitalize="characters"
                 />
+                {errors.rollNumber ? <Text style={styles.errorText}>{errors.rollNumber}</Text> : null}
+                
                 <TextInput
-                    style={styles.input}
+                    style={[styles.input, errors.email && styles.inputError]}
                     placeholder="Email"
                     value={email}
-                    onChangeText={setEmail}
+                    onChangeText={(text) => { setEmail(text); setErrors(prev => ({...prev, email: '', general: ''})) }}
                     keyboardType="email-address"
                     autoCapitalize="none"
                 />
+                {errors.email ? <Text style={styles.errorText}>{errors.email}</Text> : null}
+                
                 <TextInput
-                    style={styles.input}
+                    style={[styles.input, errors.password && styles.inputError]}
                     placeholder="Password"
                     value={password}
-                    onChangeText={setPassword}
+                    onChangeText={(text) => { setPassword(text); setErrors(prev => ({...prev, password: '', general: ''})) }}
                     secureTextEntry
                 />
+                {errors.password ? <Text style={styles.errorText}>{errors.password}</Text> : null}
+                
+                {errors.general ? <Text style={[styles.errorText, {textAlign: 'center', marginTop: 10, fontSize: 14}]}>{errors.general}</Text> : null}
             </View>
 
             <TouchableOpacity 
-                style={styles.button} 
+                style={[styles.button, loading && styles.buttonDisabled]} 
                 onPress={handleRegister}
                 disabled={loading}
             >
-                <Text style={styles.buttonText}>{loading ? 'Creating Account...' : 'Sign Up'}</Text>
+                {loading ? (
+                    <ActivityIndicator color="#ffffff" />
+                ) : (
+                    <Text style={styles.buttonText}>Sign Up</Text>
+                )}
             </TouchableOpacity>
 
             <TouchableOpacity 
                 style={styles.linkButton} 
                 onPress={() => router.back()}
+                disabled={loading}
             >
                 <Text style={styles.linkText}>Already have an account? Log In</Text>
             </TouchableOpacity>
@@ -103,7 +136,7 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 36,
         fontWeight: 'bold',
-        color: '#4f46e5',
+        color: '#FF6B00',
         marginBottom: 10,
     },
     subtitle: {
@@ -119,10 +152,19 @@ const styles = StyleSheet.create({
         backgroundColor: '#ffffff',
         padding: 15,
         borderRadius: 10,
-        marginBottom: 15,
+        marginBottom: 8,
         borderWidth: 1,
         borderColor: '#e5e7eb',
         fontSize: 16,
+    },
+    inputError: {
+        borderColor: '#ef4444',
+    },
+    errorText: {
+        color: '#ef4444',
+        fontSize: 12,
+        marginBottom: 12,
+        marginLeft: 4,
     },
     button: {
         backgroundColor: '#10b981',
@@ -131,6 +173,11 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         alignItems: 'center',
         marginBottom: 20,
+        flexDirection: 'row',
+        justifyContent: 'center',
+    },
+    buttonDisabled: {
+        opacity: 0.7,
     },
     buttonText: {
         color: '#ffffff',
@@ -141,7 +188,7 @@ const styles = StyleSheet.create({
         padding: 10,
     },
     linkText: {
-        color: '#4f46e5',
+        color: '#FF6B00',
         fontSize: 16,
         fontWeight: '500',
     }

@@ -1,6 +1,6 @@
 // File: student-mobile/app/index.js
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import api from '../services/api';
@@ -9,6 +9,7 @@ export default function LoginScreen() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
+    const [errors, setErrors] = useState({});
     const router = useRouter();
 
     useEffect(() => {
@@ -22,11 +23,26 @@ export default function LoginScreen() {
         }
     };
 
-    const handleLogin = async () => {
-        if (!email || !password) {
-            Alert.alert('Error', 'Please fill all fields');
-            return;
+    const validate = () => {
+        const newErrors = {};
+        if (!email) {
+            newErrors.email = 'Email is required';
+        } else if (!/\S+@\S+\.\S+/.test(email)) {
+            newErrors.email = 'Please enter a valid email address';
         }
+        
+        if (!password) {
+            newErrors.password = 'Password is required';
+        } else if (password.length < 6) {
+            newErrors.password = 'Password must be at least 6 characters';
+        }
+        
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
+    const handleLogin = async () => {
+        if (!validate()) return;
 
         setLoading(true);
         try {
@@ -34,7 +50,7 @@ export default function LoginScreen() {
             await SecureStore.setItemAsync('studentToken', response.data.token);
             router.replace('/(tabs)/menu');
         } catch (error) {
-            Alert.alert('Login Failed', 'Invalid credentials');
+            setErrors({ general: 'Invalid email or password' });
         } finally {
             setLoading(false);
         }
@@ -47,33 +63,43 @@ export default function LoginScreen() {
             
             <View style={styles.inputContainer}>
                 <TextInput
-                    style={styles.input}
+                    style={[styles.input, errors.email && styles.inputError]}
                     placeholder="Email"
                     value={email}
-                    onChangeText={setEmail}
+                    onChangeText={(text) => { setEmail(text); setErrors(prev => ({...prev, email: '', general: ''})) }}
                     keyboardType="email-address"
                     autoCapitalize="none"
                 />
+                {errors.email ? <Text style={styles.errorText}>{errors.email}</Text> : null}
+                
                 <TextInput
-                    style={styles.input}
+                    style={[styles.input, errors.password && styles.inputError]}
                     placeholder="Password"
                     value={password}
-                    onChangeText={setPassword}
+                    onChangeText={(text) => { setPassword(text); setErrors(prev => ({...prev, password: '', general: ''})) }}
                     secureTextEntry
                 />
+                {errors.password ? <Text style={styles.errorText}>{errors.password}</Text> : null}
+                
+                {errors.general ? <Text style={[styles.errorText, {textAlign: 'center', marginTop: 10, fontSize: 14}]}>{errors.general}</Text> : null}
             </View>
 
             <TouchableOpacity 
-                style={styles.button} 
+                style={[styles.button, loading && styles.buttonDisabled]} 
                 onPress={handleLogin}
                 disabled={loading}
             >
-                <Text style={styles.buttonText}>{loading ? 'Logging in...' : 'Login'}</Text>
+                {loading ? (
+                    <ActivityIndicator color="#ffffff" />
+                ) : (
+                    <Text style={styles.buttonText}>Log In</Text>
+                )}
             </TouchableOpacity>
 
             <TouchableOpacity 
                 style={styles.linkButton} 
                 onPress={() => router.push('/register')}
+                disabled={loading}
             >
                 <Text style={styles.linkText}>New here? Create an account</Text>
             </TouchableOpacity>
@@ -92,7 +118,7 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 36,
         fontWeight: 'bold',
-        color: '#4f46e5',
+        color: '#FF6B00',
         marginBottom: 10,
     },
     subtitle: {
@@ -108,17 +134,31 @@ const styles = StyleSheet.create({
         backgroundColor: '#ffffff',
         padding: 15,
         borderRadius: 10,
-        marginBottom: 15,
+        marginBottom: 8,
         borderWidth: 1,
         borderColor: '#e5e7eb',
         fontSize: 16,
     },
+    inputError: {
+        borderColor: '#ef4444',
+    },
+    errorText: {
+        color: '#ef4444',
+        fontSize: 12,
+        marginBottom: 12,
+        marginLeft: 4,
+    },
     button: {
-        backgroundColor: '#4f46e5',
+        backgroundColor: '#FF6B00',
         width: '100%',
         padding: 15,
         borderRadius: 10,
         alignItems: 'center',
+        flexDirection: 'row',
+        justifyContent: 'center',
+    },
+    buttonDisabled: {
+        opacity: 0.7,
     },
     buttonText: {
         color: '#ffffff',
@@ -130,7 +170,7 @@ const styles = StyleSheet.create({
         padding: 10,
     },
     linkText: {
-        color: '#4f46e5',
+        color: '#FF6B00',
         fontSize: 16,
         fontWeight: '500',
     }

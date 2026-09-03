@@ -1,35 +1,74 @@
 // File: student-mobile/app/(tabs)/menu.js
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, Image, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, SectionList, Image, TouchableOpacity, StyleSheet, ActivityIndicator, RefreshControl } from 'react-native';
+import Toast from 'react-native-toast-message';
 import api from '../../services/api';
 import { useCart } from '../../context/CartContext';
 
 export default function MenuScreen() {
-    const [menuItems, setMenuItems] = useState([]);
+    const [menuSections, setMenuSections] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [refreshing, setRefreshing] = useState(false);
     const { addToCart } = useCart();
 
     useEffect(() => {
         fetchMenu();
     }, []);
 
+    const onRefresh = () => {
+        setRefreshing(true);
+        fetchMenu();
+    };
+
     const fetchMenu = async () => {
         try {
             const response = await api.get('/menu');
-            setMenuItems(response.data);
+            const items = response.data;
+
+            const grouped = items.reduce((acc, item) => {
+                const vendorKey = item.vendorId ? `Vendor #${item.vendorId}` : 'Other';
+                if (!acc[vendorKey]) acc[vendorKey] = [];
+                acc[vendorKey].push(item);
+                return acc;
+            }, {});
+
+            const sections = Object.keys(grouped).map(key => ({
+                title: key,
+                data: grouped[key]
+            }));
+
+            setMenuSections(sections);
         } catch (error) {
             console.error('Failed to fetch menu:', error);
         } finally {
             setLoading(false);
+            setRefreshing(false);
         }
+    };
+
+    const handleAddToCart = (item) => {
+        addToCart(item);
+        Toast.show({
+            type: 'success',
+            text1: 'Added to Cart',
+            text2: `${item.name} added successfully.`,
+            position: 'top',
+            visibilityTime: 2000,
+            topOffset: 60,
+        });
+    };
+
+    const IMAGE_BASE_URL = api.defaults.baseURL ? api.defaults.baseURL.replace('/api', '') : 'https://zing-canteen-backend.onrender.com';
+
+    const getImageUrl = (url) => {
+        if (!url) return null;
+        return url.startsWith('http') ? url : `${IMAGE_BASE_URL}${url}`;
     };
 
     const renderItem = ({ item }) => (
         <View style={styles.card}>
-            {item.imageUrl ? (
-                // Assuming backend is serving images at https://zing-canteen-backend.onrender.com/uploads/...
-                // The DTO imageUrl should ideally be absolute or we prepend the base URL
-                <Image source={{ uri: `https://zing-canteen-backend.onrender.com${item.imageUrl}` }} style={styles.image} />
+            {getImageUrl(item.imageUrl) ? (
+                <Image source={{ uri: getImageUrl(item.imageUrl) }} style={styles.image} />
             ) : (
                 <View style={[styles.image, styles.placeholderImage]}>
                     <Text style={styles.placeholderText}>No Image</Text>
@@ -41,7 +80,7 @@ export default function MenuScreen() {
                 <Text style={styles.price}>₹{item.price}</Text>
                 <TouchableOpacity 
                     style={styles.addButton}
-                    onPress={() => addToCart(item)}
+                    onPress={() => handleAddToCart(item)}
                 >
                     <Text style={styles.addButtonText}>Add to Cart</Text>
                 </TouchableOpacity>
@@ -52,18 +91,23 @@ export default function MenuScreen() {
     if (loading) {
         return (
             <View style={styles.center}>
-                <ActivityIndicator size="large" color="#4f46e5" />
+                <ActivityIndicator size="large" color="#FF6B00" />
             </View>
         );
     }
 
     return (
         <View style={styles.container}>
-            <FlatList
-                data={menuItems}
+            <SectionList
+                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={["#FF6B00"]} />}
+                sections={menuSections}
                 keyExtractor={(item) => item.id.toString()}
                 renderItem={renderItem}
+                renderSectionHeader={({ section: { title } }) => (
+                    <Text style={styles.sectionHeader}>{title}</Text>
+                )}
                 contentContainerStyle={styles.list}
+                stickySectionHeadersEnabled={false}
             />
         </View>
     );
@@ -81,6 +125,14 @@ const styles = StyleSheet.create({
     },
     list: {
         padding: 16,
+    },
+    sectionHeader: {
+        fontSize: 22,
+        fontWeight: 'bold',
+        color: '#FF6B00',
+        backgroundColor: '#f9fafb',
+        paddingVertical: 10,
+        marginBottom: 10,
     },
     card: {
         backgroundColor: '#fff',
@@ -124,7 +176,7 @@ const styles = StyleSheet.create({
         marginTop: 4,
     },
     addButton: {
-        backgroundColor: '#4f46e5',
+        backgroundColor: '#FF6B00',
         paddingVertical: 8,
         paddingHorizontal: 12,
         borderRadius: 6,

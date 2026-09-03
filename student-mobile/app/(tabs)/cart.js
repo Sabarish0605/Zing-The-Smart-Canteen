@@ -1,6 +1,7 @@
 // File: student-mobile/app/(tabs)/cart.js
 import React, { useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
+import Toast from 'react-native-toast-message';
 import { useCart } from '../../context/CartContext';
 import api from '../../services/api';
 import { useRouter } from 'expo-router';
@@ -12,7 +13,13 @@ export default function CartScreen() {
 
     const handlePlaceOrder = async () => {
         if (cart.length === 0) {
-            Alert.alert('Empty Cart', 'Please add items to your cart first.');
+            Toast.show({
+                type: 'error',
+                text1: 'Empty Cart',
+                text2: 'Please add items to your cart first.',
+                position: 'top',
+                topOffset: 60,
+            });
             return;
         }
 
@@ -32,17 +39,25 @@ export default function CartScreen() {
             // For now, we simulate success and call the backend directly.
             const response = await api.post('/orders', orderRequest);
             
-            Alert.alert(
-                'Success!', 
-                `Order placed successfully. Total: ₹${response.data.totalAmount}`,
-                [{ text: 'OK', onPress: () => {
-                    clearCart();
-                    router.push('/(tabs)/orders');
-                }}]
-            );
+            Toast.show({
+                type: 'success',
+                text1: 'Order Placed!',
+                text2: `Successfully placed order for ₹${response.data.totalAmount}`,
+                position: 'top',
+                topOffset: 60,
+            });
+            
+            clearCart();
+            router.push('/(tabs)/orders');
         } catch (error) {
             console.error('Order creation failed:', error);
-            Alert.alert('Error', 'Failed to place order. Please try again.');
+            Toast.show({
+                type: 'error',
+                text1: 'Checkout Failed',
+                text2: 'Failed to place order. Please try again.',
+                position: 'top',
+                topOffset: 60,
+            });
         } finally {
             setLoading(false);
         }
@@ -65,7 +80,9 @@ export default function CartScreen() {
         <View style={styles.container}>
             {cart.length === 0 ? (
                 <View style={styles.emptyContainer}>
-                    <Text style={styles.emptyText}>Your cart is empty.</Text>
+                    <Text style={styles.emptyIcon}>🛒</Text>
+                    <Text style={styles.emptyTitle}>Your cart is empty</Text>
+                    <Text style={styles.emptySubtitle}>Explore the menu and add some delicious items.</Text>
                 </View>
             ) : (
                 <>
@@ -109,10 +126,23 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
+        padding: 40,
     },
-    emptyText: {
-        fontSize: 18,
+    emptyIcon: {
+        fontSize: 80,
+        marginBottom: 20,
+    },
+    emptyTitle: {
+        fontSize: 22,
+        fontWeight: 'bold',
+        color: '#111827',
+        marginBottom: 10,
+    },
+    emptySubtitle: {
+        fontSize: 16,
         color: '#6b7280',
+        textAlign: 'center',
+        lineHeight: 24,
     },
     list: {
         padding: 16,
@@ -179,7 +209,7 @@ const styles = StyleSheet.create({
         color: '#1f2937',
     },
     checkoutBtn: {
-        backgroundColor: '#4f46e5',
+        backgroundColor: '#FF6B00',
         paddingVertical: 16,
         borderRadius: 12,
         alignItems: 'center',

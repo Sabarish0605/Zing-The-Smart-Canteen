@@ -1,49 +1,25 @@
 // File: student-mobile/app/(tabs)/menu.js
 import React, { useState, useEffect } from 'react';
-import { View, Text, SectionList, Image, TouchableOpacity, StyleSheet, ActivityIndicator, RefreshControl } from 'react-native';
+import { View, Text, SectionList, TouchableOpacity, StyleSheet, ActivityIndicator, RefreshControl } from 'react-native';
+import { Image } from 'expo-image';
 import Toast from 'react-native-toast-message';
 import api from '../../services/api';
-import { useCart } from '../../context/CartContext';
+import { useStore } from '../../store/useStore';
 
 export default function MenuScreen() {
-    const [menuSections, setMenuSections] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const { addToCart, menuData: menuSections, menuLoading: loading, fetchMenu } = useStore();
     const [refreshing, setRefreshing] = useState(false);
-    const { addToCart } = useCart();
 
     useEffect(() => {
-        fetchMenu();
+        if (menuSections.length === 0) {
+            fetchMenu();
+        }
     }, []);
 
-    const onRefresh = () => {
+    const onRefresh = async () => {
         setRefreshing(true);
-        fetchMenu();
-    };
-
-    const fetchMenu = async () => {
-        try {
-            const response = await api.get('/menu');
-            const items = response.data;
-
-            const grouped = items.reduce((acc, item) => {
-                const vendorKey = item.vendorId ? `Vendor #${item.vendorId}` : 'Other';
-                if (!acc[vendorKey]) acc[vendorKey] = [];
-                acc[vendorKey].push(item);
-                return acc;
-            }, {});
-
-            const sections = Object.keys(grouped).map(key => ({
-                title: key,
-                data: grouped[key]
-            }));
-
-            setMenuSections(sections);
-        } catch (error) {
-            console.error('Failed to fetch menu:', error);
-        } finally {
-            setLoading(false);
-            setRefreshing(false);
-        }
+        await fetchMenu();
+        setRefreshing(false);
     };
 
     const handleAddToCart = (item) => {
@@ -68,7 +44,12 @@ export default function MenuScreen() {
     const renderItem = ({ item }) => (
         <View style={styles.card}>
             {getImageUrl(item.imageUrl) ? (
-                <Image source={{ uri: getImageUrl(item.imageUrl) }} style={styles.image} />
+                <Image 
+                    source={{ uri: getImageUrl(item.imageUrl) }} 
+                    style={styles.image}
+                    contentFit="cover"
+                    transition={200}
+                />
             ) : (
                 <View style={[styles.image, styles.placeholderImage]}>
                     <Text style={styles.placeholderText}>No Image</Text>

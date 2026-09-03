@@ -98,6 +98,13 @@ const api = {
         });
     },
 
+    async updateMenuItem(id, formData) {
+        return await this.request(`/menu/${id}`, {
+            method: 'PUT',
+            body: formData
+        });
+    },
+
     // Orders
     async getActiveOrders() {
         return await this.request('/orders/vendor');

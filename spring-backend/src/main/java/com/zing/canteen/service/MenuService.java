@@ -7,6 +7,7 @@ import com.zing.canteen.entity.Vendor;
 import com.zing.canteen.repository.MenuItemRepository;
 import com.zing.canteen.repository.VendorRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -25,6 +26,7 @@ public class MenuService {
 
     private final MenuItemRepository menuItemRepository;
     private final VendorRepository vendorRepository;
+    private final SimpMessagingTemplate messagingTemplate;
     private final String UPLOAD_DIR = "uploads/";
 
     public List<MenuItemDto> getAllAvailableItems() {
@@ -59,7 +61,9 @@ public class MenuService {
                 .isAvailable(dto.getIsAvailable() != null ? dto.getIsAvailable() : true)
                 .build();
 
-        return mapToDto(menuItemRepository.save(item));
+        MenuItemDto savedDto = mapToDto(menuItemRepository.save(item));
+        messagingTemplate.convertAndSend("/topic/menu", "UPDATE");
+        return savedDto;
     }
 
     @Transactional
@@ -81,7 +85,9 @@ public class MenuService {
         item.setPrice(dto.getPrice() != null ? dto.getPrice() : item.getPrice());
         item.setIsAvailable(dto.getIsAvailable() != null ? dto.getIsAvailable() : item.getIsAvailable());
 
-        return mapToDto(menuItemRepository.save(item));
+        MenuItemDto savedDto = mapToDto(menuItemRepository.save(item));
+        messagingTemplate.convertAndSend("/topic/menu", "UPDATE");
+        return savedDto;
     }
 
     @Transactional
@@ -93,6 +99,7 @@ public class MenuService {
             throw new RuntimeException("Unauthorized to delete this item");
         }
         menuItemRepository.delete(item);
+        messagingTemplate.convertAndSend("/topic/menu", "UPDATE");
     }
 
     private String saveImage(MultipartFile file) {

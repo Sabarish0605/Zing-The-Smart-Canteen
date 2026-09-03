@@ -2,9 +2,9 @@
 import React, { useEffect, useState } from 'react';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { View, Text, ActivityIndicator } from 'react-native';
-import * as SecureStore from 'expo-secure-store';
-import { CartProvider } from '../context/CartContext';
+import * as SecureStore from '../services/storage';
 import Toast from 'react-native-toast-message';
+import websocketService from '../services/websocketService';
 
 export default function RootLayout() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -33,8 +33,18 @@ export default function RootLayout() {
 
         if (!isAuthenticated && inAuthGroup) {
             router.replace('/');
+            websocketService.disconnect();
         } else if (isAuthenticated && (segments.length === 0 || segments[0] === 'index')) {
             router.replace('/(tabs)/menu');
+            // Connect to WebSocket
+            SecureStore.getItemAsync('studentId').then(studentId => {
+                websocketService.connect(studentId);
+            });
+        } else if (isAuthenticated && inAuthGroup) {
+             // Make sure we connect if already authenticated but just loaded
+             SecureStore.getItemAsync('studentId').then(studentId => {
+                websocketService.connect(studentId);
+            });
         }
     }, [isAuthenticated, isReady, segments]);
 
@@ -48,14 +58,12 @@ export default function RootLayout() {
     }
 
     return (
-        <>
-            <CartProvider>
+            <>
                 <Stack screenOptions={{ headerShown: false }}>
                     <Stack.Screen name="index" />
                     <Stack.Screen name="(tabs)" />
                     <Stack.Screen name="register" />
                 </Stack>
-            </CartProvider>
             <Toast />
         </>
     );

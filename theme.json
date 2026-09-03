@@ -1,0 +1,28 @@
+{
+  "student": {
+    "name": "Warm Orange",
+    "colors": {
+      "primary": "#FF6B00",
+      "background": "#f9fafb",
+      "surface": "#ffffff",
+      "text": "#1f2937",
+      "textSecondary": "#6b7280",
+      "success": "#059669",
+      "error": "#ef4444",
+      "border": "#e5e7eb"
+    }
+  },
+  "vendor": {
+    "name": "Dark Professional",
+    "colors": {
+      "primary": "#4f46e5",
+      "background": "#111827",
+      "surface": "#1f2937",
+      "text": "#f9fafb",
+      "textSecondary": "#9ca3af",
+      "success": "#10b981",
+      "error": "#ef4444",
+      "border": "#374151"
+    }
+  }
+}

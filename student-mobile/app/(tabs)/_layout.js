@@ -1,11 +1,11 @@
 // File: student-mobile/app/(tabs)/_layout.js
 import React from 'react';
 import { Tabs } from 'expo-router';
-import { useCart } from '../../context/CartContext';
+import { useStore } from '../../store/useStore';
 import { Text, View } from 'react-native';
 
 export default function TabLayout() {
-    const { cart } = useCart();
+    const { cart } = useStore();
     
     // Simple logic to calculate total items in cart for the badge
     const cartItemCount = cart.reduce((sum, item) => sum + item.quantity, 0);

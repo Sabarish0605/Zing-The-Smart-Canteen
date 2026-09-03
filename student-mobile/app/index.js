@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
-import * as SecureStore from 'expo-secure-store';
+import * as SecureStore from '../services/storage';
 import api from '../services/api';
 
 export default function LoginScreen() {
@@ -48,6 +48,9 @@ export default function LoginScreen() {
         try {
             const response = await api.post('/auth/login', { email, password });
             await SecureStore.setItemAsync('studentToken', response.data.token);
+            if (response.data.userId) {
+                await SecureStore.setItemAsync('studentId', response.data.userId.toString());
+            }
             router.replace('/(tabs)/menu');
         } catch (error) {
             setErrors({ general: 'Invalid email or password' });

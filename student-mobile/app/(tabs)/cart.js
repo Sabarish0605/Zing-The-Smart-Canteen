@@ -1,14 +1,17 @@
 // File: student-mobile/app/(tabs)/cart.js
 import React, { useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, Modal } from 'react-native';
+import QRCode from 'react-native-qrcode-svg';
 import Toast from 'react-native-toast-message';
-import { useCart } from '../../context/CartContext';
+import { useStore } from '../../store/useStore';
 import api from '../../services/api';
 import { useRouter } from 'expo-router';
 
 export default function CartScreen() {
-    const { cart, removeFromCart, getTotal, clearCart, selectedVendorId } = useCart();
+    const { cart, removeFromCart, getTotal, clearCart, selectedVendorId } = useStore();
     const [loading, setLoading] = useState(false);
+    const [qrModalVisible, setQrModalVisible] = useState(false);
+    const [createdOrderId, setCreatedOrderId] = useState(null);
     const router = useRouter();
 
     const handlePlaceOrder = async () => {
@@ -47,8 +50,10 @@ export default function CartScreen() {
                 topOffset: 60,
             });
             
+            setCreatedOrderId(response.data.id.toString());
+            setQrModalVisible(true);
             clearCart();
-            router.push('/(tabs)/orders');
+            // router.push('/(tabs)/orders'); // Navigate after closing modal
         } catch (error) {
             console.error('Order creation failed:', error);
             Toast.show({
@@ -113,6 +118,46 @@ export default function CartScreen() {
                     </View>
                 </>
             )}
+
+            <Modal
+                animationType="fade"
+                transparent={true}
+                visible={qrModalVisible}
+                onRequestClose={() => {
+                    setQrModalVisible(false);
+                    router.push('/(tabs)/orders');
+                }}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+                        <Text style={styles.modalTitle}>Order Confirmed!</Text>
+                        <Text style={styles.modalText}>Show this QR code to the vendor to collect your food.</Text>
+                        
+                        <View style={styles.qrContainer}>
+                            {createdOrderId && (
+                                <QRCode
+                                    value={createdOrderId}
+                                    size={200}
+                                    color="black"
+                                    backgroundColor="white"
+                                />
+                            )}
+                        </View>
+                        
+                        <Text style={styles.orderIdText}>Order #{createdOrderId}</Text>
+
+                        <TouchableOpacity 
+                            style={styles.closeModalBtn}
+                            onPress={() => {
+                                setQrModalVisible(false);
+                                router.push('/(tabs)/orders');
+                            }}
+                        >
+                            <Text style={styles.closeModalBtnText}>Done</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
         </View>
     );
 }
@@ -217,6 +262,59 @@ const styles = StyleSheet.create({
     checkoutBtnText: {
         color: '#fff',
         fontSize: 18,
+        fontWeight: 'bold',
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    modalContent: {
+        backgroundColor: '#fff',
+        borderRadius: 16,
+        padding: 24,
+        width: '80%',
+        alignItems: 'center',
+        elevation: 5,
+    },
+    modalTitle: {
+        fontSize: 22,
+        fontWeight: 'bold',
+        color: '#111827',
+        marginBottom: 8,
+    },
+    modalText: {
+        fontSize: 16,
+        color: '#6b7280',
+        textAlign: 'center',
+        marginBottom: 20,
+    },
+    qrContainer: {
+        padding: 16,
+        backgroundColor: '#fff',
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#e5e7eb',
+        marginBottom: 16,
+    },
+    orderIdText: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#374151',
+        marginBottom: 24,
+    },
+    closeModalBtn: {
+        backgroundColor: '#FF6B00',
+        paddingVertical: 12,
+        paddingHorizontal: 32,
+        borderRadius: 8,
+        width: '100%',
+        alignItems: 'center',
+    },
+    closeModalBtnText: {
+        color: '#fff',
+        fontSize: 16,
         fontWeight: 'bold',
     }
 });

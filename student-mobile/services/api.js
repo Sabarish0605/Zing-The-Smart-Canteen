@@ -1,6 +1,6 @@
 // File: student-mobile/services/api.js
 import axios from 'axios';
-import * as SecureStore from 'expo-secure-store';
+import * as SecureStore from './storage';
 
 // NOTE: Replace YOUR_LOCAL_IP with your machine's actual IP address on your local network
 const API_BASE_URL = 'https://zing-canteen-backend.onrender.com/api'; 

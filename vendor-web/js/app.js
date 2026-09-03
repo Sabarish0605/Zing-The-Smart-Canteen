@@ -42,6 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('menuForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         
+        const id = document.getElementById('menuItemId').value;
         const name = document.getElementById('menuName').value;
         const price = document.getElementById('menuPrice').value;
         const isAvailable = document.getElementById('menuAvailable').checked;
@@ -49,7 +50,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const formData = new FormData();
         
-        // Match the backend DTO structure: @RequestPart("item") MenuItemDto dto
         const itemDto = {
             name: name,
             price: parseFloat(price),
@@ -65,12 +65,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            await api.createMenuItem(formData);
-            showToast("Menu Item Added!");
+            if (id) {
+                await api.updateMenuItem(id, formData);
+                showToast("Menu Item Updated!");
+            } else {
+                await api.createMenuItem(formData);
+                showToast("Menu Item Added!");
+            }
             toggleMenuModal(false);
             loadMenu();
         } catch (error) {
-            alert('Failed to add menu item.');
+            alert('Failed to save menu item.');
         }
     });
 });
@@ -180,7 +185,8 @@ async function loadMenu() {
                     </span>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <button onclick="deleteMenuItem(${item.id})" class="text-red-600 hover:text-red-900">Delete</button>
+                    <button onclick='toggleMenuModal(true, ${JSON.stringify(item).replace(/'/g, "&apos;")})' class="text-blue-500 hover:text-blue-400 mr-3">Edit</button>
+                    <button onclick="deleteMenuItem(${item.id})" class="text-red-500 hover:text-red-400">Delete</button>
                 </td>
             </tr>
         `).join('');
@@ -201,10 +207,21 @@ async function deleteMenuItem(id) {
     }
 }
 
-function toggleMenuModal(show) {
+function toggleMenuModal(show, item = null) {
     const modal = document.getElementById('menuModal');
     if (show) {
         document.getElementById('menuForm').reset();
+        const title = document.getElementById('menuModalTitle');
+        if (item) {
+            title.textContent = 'Edit Menu Item';
+            document.getElementById('menuItemId').value = item.id;
+            document.getElementById('menuName').value = item.name;
+            document.getElementById('menuPrice').value = item.price;
+            document.getElementById('menuAvailable').checked = item.isAvailable;
+        } else {
+            title.textContent = 'Add Menu Item';
+            document.getElementById('menuItemId').value = '';
+        }
         modal.classList.remove('hidden-section');
     } else {
         modal.classList.add('hidden-section');

@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
-import * as SecureStore from 'expo-secure-store';
+import * as SecureStore from '../services/storage';
 import api from '../services/api';
 
 export default function RegisterScreen() {
@@ -48,10 +48,19 @@ export default function RegisterScreen() {
                 role: 'STUDENT'
             });
             await SecureStore.setItemAsync('studentToken', response.data.token);
+            if (response.data.userId) {
+                await SecureStore.setItemAsync('studentId', response.data.userId.toString());
+            }
             router.replace('/(tabs)/menu');
         } catch (error) {
-            console.error(error);
-            setErrors({ general: 'Registration failed. Email or Roll Number might be in use.' });
+            console.log('Registration error:', error);
+            let errorMessage = 'Registration failed. Email or Roll Number might be in use.';
+            
+            if (error.response && error.response.data) {
+                errorMessage = error.response.data.message || error.response.data.error || errorMessage;
+            }
+            
+            setErrors({ general: errorMessage });
         } finally {
             setLoading(false);
         }

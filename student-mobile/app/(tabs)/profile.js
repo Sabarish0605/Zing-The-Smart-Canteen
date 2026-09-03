@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import * as SecureStore from 'expo-secure-store';
+import * as SecureStore from '../../services/storage';
 import { useRouter } from 'expo-router';
 
 export default function ProfileScreen() {

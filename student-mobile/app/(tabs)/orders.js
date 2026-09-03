@@ -4,7 +4,7 @@ import { View, Text, ScrollView, StyleSheet, ActivityIndicator, RefreshControl }
 import QRCode from 'react-native-qrcode-svg';
 import api from '../../services/api';
 import { useFocusEffect } from 'expo-router';
-import * as SecureStore from 'expo-secure-store';
+import * as SecureStore from '../../services/storage';
 
 export default function OrdersScreen() {
     const [latestOrder, setLatestOrder] = useState(null);

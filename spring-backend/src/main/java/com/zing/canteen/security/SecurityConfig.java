@@ -36,7 +36,7 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/api/auth/**", "/auth/**").permitAll()
                 .requestMatchers("/ws/**").permitAll() // WebSocket endpoint
                 .requestMatchers("/api/vendor/**").hasRole("VENDOR")
                 .requestMatchers("/api/student/**").hasRole("STUDENT")

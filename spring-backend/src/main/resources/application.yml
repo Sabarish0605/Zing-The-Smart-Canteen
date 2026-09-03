@@ -27,3 +27,7 @@ jwt:
 razorpay:
   key-id: ${RAZORPAY_KEY_ID:rzp_test_xxxxxx}
   key-secret: ${RAZORPAY_KEY_SECRET:xxxxxx}
+
+logging:
+  level:
+    org.springframework.security: DEBUG

@@ -14,6 +14,11 @@ const api = axios.create({
 
 api.interceptors.request.use(
     async (config) => {
+        // Skip adding token for auth routes to prevent 403s
+        if (config.url && (config.url.includes('/auth/login') || config.url.includes('/auth/register'))) {
+            return config;
+        }
+
         const token = await SecureStore.getItemAsync('studentToken');
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
